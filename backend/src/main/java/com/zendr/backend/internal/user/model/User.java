@@ -26,6 +26,7 @@ public class User {
     private String password;
     private DeportiveProfile deportiveProfile;
     private Penalties penalties;
+    private BillingDetails billingDetails;
     private LocalDate createdAt;
     private LocalDate bod;
     private String rol;
