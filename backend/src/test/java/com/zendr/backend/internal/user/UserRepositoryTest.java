@@ -2,8 +2,11 @@ package com.zendr.backend.internal.user;
 
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.repository.UserRepository;
+
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -13,22 +16,21 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.mongodb.MongoDBContainer;
 
-import javax.swing.text.html.Option;
-import java.sql.Time;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
 @ActiveProfiles("dev")
 @Testcontainers
+@Slf4j
 public class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
-    private User user;
 
     @Container
     static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
@@ -38,6 +40,7 @@ public class UserRepositoryTest {
         registry.add("spring.mongodb.uri", mongo::getReplicaSetUrl);
     }
 
+
     @BeforeEach
     void setUp() {
 
@@ -45,7 +48,6 @@ public class UserRepositoryTest {
         userRepository.deleteAll();
 
         // CREACION DE UN USUARIO
-
         // Perfil deportivo
         Map<String, String> favDisciplines = Map.of(
                 "Hacer pantallitas", "Avanzado",
@@ -80,7 +82,7 @@ public class UserRepositoryTest {
                 .build();
 
 
-        user = User.builder()
+        User user = User.builder()
                 .name("Sergio Ruiz")
                 .profileImg("https://stanforddaily.com/wp-content/uploads/2025/01/IMG_1172.jpg")
                 .email("sergioreactpro@gmail.com")
@@ -99,20 +101,23 @@ public class UserRepositoryTest {
 
     @Test
     void shouldFindUserById() {
-        Optional<User> user = userRepository.findByEmail("sergioreactpro@gmail.com");
-        Optional<User> result = userRepository.findById(user.get().getId());
 
-        assert(result).isPresent();
-        assert(result.get().getName()).equals("Sergio Ruiz");
+        User user = userRepository.findByEmail("sergioreactpro@gmail.com")
+                .orElseThrow(() -> new AssertionError("Usuario no encontrado por email"));
+
+        User result = userRepository.findById(user.getId())
+                .orElseThrow(() -> new AssertionError("Usuario no encontrado por ID"));
+
+        assertEquals("Sergio Ruiz", result.getName());
     }
 
     @Test
     void shouldFindUserByEmail() {
 
-        Optional<User> result = userRepository.findByEmail("sergioreactpro@gmail.com");
+        User result = userRepository.findByEmail("sergioreactpro@gmail.com")
+                .orElseThrow(() -> new AssertionError("Usuario no encontrado por email"));
 
-        assert(result).isPresent();
-        assert(result.get().getName()).equals("Sergio Ruiz");
+        assertEquals("Sergio Ruiz", result.getName());
     }
 
     @Test
@@ -120,16 +125,16 @@ public class UserRepositoryTest {
 
         boolean exists = userRepository.existsByEmail("sergioreactpro@gmail.com");
 
-        assert(exists);
+        assertTrue(exists);
     }
 
     @Test
     void shouldFindUserByQRCode() {
 
-        Optional<User> result = userRepository.findByQRCode("QR123456789");
+        User result = userRepository.findByQRCode("QR123456789")
+                .orElseThrow(() -> new AssertionError("Usuario no encontrado por QRCode"));
 
-        assert(result).isPresent();
-        assert(result.get().getEmail()).equals("sergioreactpro@gmail.com");
+        assertEquals("sergioreactpro@gmail.com", result.getEmail());
     }
 
     @Test
@@ -137,8 +142,8 @@ public class UserRepositoryTest {
 
         List<User> users = userRepository.findByRol("USER");
 
-        assert !(users).isEmpty();
-        assert(users.getFirst().getRol()).equals("USER");
+        assertFalse(users.isEmpty());
+        assertEquals("USER", users.getFirst().getRol());
     }
 
     @Test
@@ -146,7 +151,7 @@ public class UserRepositoryTest {
 
         List<User> users = userRepository.findByNameContainingIgnoreCase("Sergio");
 
-        assert !(users).isEmpty();
-        assert(users.getFirst().getName()).equals("Sergio Ruiz");
+        assertFalse(users.isEmpty());
+        assertEquals("Sergio Ruiz", users.getFirst().getName());
     }
 }

@@ -1,10 +1,14 @@
 spring:
   application:
     name: backend
-
+  output:
+    ansi:
+      enabled: always
   #devtools:
   #  restart:
   #    enabled: false
-
 server:
   port: ${ZENDR_BACKEND_PORT}
+logging:
+  level:
+    root: INFO
