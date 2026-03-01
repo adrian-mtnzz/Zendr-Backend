@@ -7,7 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBContainer;
 
+import javax.swing.text.html.Option;
 import java.sql.Time;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -17,11 +23,20 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 @DataMongoTest
 @ActiveProfiles("dev")
+@Testcontainers
 public class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
     private User user;
+
+    @Container
+    static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
+
+    @DynamicPropertySource
+    static void mongoProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.mongodb.uri", mongo::getReplicaSetUrl);
+    }
 
     @BeforeEach
     void setUp() {
@@ -83,6 +98,15 @@ public class UserRepositoryTest {
     }
 
     @Test
+    void shouldFindUserById() {
+        Optional<User> user = userRepository.findByEmail("sergioreactpro@gmail.com");
+        Optional<User> result = userRepository.findById(user.get().getId());
+
+        assert(result).isPresent();
+        assert(result.get().getName()).equals("Sergio Ruiz");
+    }
+
+    @Test
     void shouldFindUserByEmail() {
 
         Optional<User> result = userRepository.findByEmail("sergioreactpro@gmail.com");
@@ -114,7 +138,7 @@ public class UserRepositoryTest {
         List<User> users = userRepository.findByRol("USER");
 
         assert !(users).isEmpty();
-        assert(users.get(0).getRol()).equals("USER");
+        assert(users.getFirst().getRol()).equals("USER");
     }
 
     @Test
