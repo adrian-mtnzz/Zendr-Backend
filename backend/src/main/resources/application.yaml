@@ -2,9 +2,9 @@ spring:
   application:
     name: backend
 
-  devtools:
-    restart:
-      enabled: false
+  #devtools:
+  #  restart:
+  #    enabled: false
 
 server:
-  port: 8081
+  port: ${ZENDR_BACKEND_PORT}

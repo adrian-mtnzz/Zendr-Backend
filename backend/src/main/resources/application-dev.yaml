@@ -1,0 +1,4 @@
+spring:
+  mongodb:
+    uri: ${ZENDR_DB_URI}
+    database: "test_db"

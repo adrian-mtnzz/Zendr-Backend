@@ -1,13 +1,16 @@
 package com.zendr.backend;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+
+@DataMongoTest
+@ActiveProfiles("dev")
 class BackendApplicationTests {
 
+
 	@Test
-	void contextLoads() {
-	}
+	void contextLoads() {}
 
 }
