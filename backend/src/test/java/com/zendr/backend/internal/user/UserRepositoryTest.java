@@ -2,7 +2,7 @@ package com.zendr.backend.internal.user;
 
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
-import com.zendr.backend.internal.user.model.enums.SubcriptionStatus;
+import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.SubscriptionType;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
@@ -79,10 +79,10 @@ public class UserRepositoryTest {
         // Detalles de pagos
         Subscription subscription = Subscription.builder()
                 .stripeSubscriptionId("3232kgr45Ad9")
-                .status(SubcriptionStatus.ACTIVE)
+                .status(SubscriptionStatus.ACTIVE)
                 .type(SubscriptionType.MONITOR)
                 .selfRenewal(true)
-                .expirationDate(Date.from(Instant.now().plus(30, DAYS)))
+                .expirationDate(Instant.now().plus(30, DAYS))
                 .build();
 
         BillingDetails billingDetails = BillingDetails.builder()

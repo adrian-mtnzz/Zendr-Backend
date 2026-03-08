@@ -1,4 +1,4 @@
-package com.zendr.backend.api.controllers.test;
+package com.zendr.backend.api.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

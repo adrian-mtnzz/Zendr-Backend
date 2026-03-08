@@ -12,10 +12,14 @@ import java.util.Optional;
 public interface UserRepository extends MongoRepository<User, String> {
 
     List<User> findByNameContainingIgnoreCase(String username);
+    Optional<User> findByUsername(String username);
     List<User> findByRole(UserRole rol);
-    List<User> findByDeportiveProfileContains(String discipineId);
+    List<User> findByDeportiveProfile_FavDisciplines_DisciplineId(String disciplineId);
     Optional<User> findByEmail(String email);
-    Optional<User> findByQRCode(String QRCode);
+    Optional<User> findByQRCode(String qrCode);
     boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
+
 }
+
 

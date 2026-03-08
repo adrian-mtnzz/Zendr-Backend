@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum SubcriptionStatus {
+public enum SubscriptionStatus {
     ACTIVE("Activa"),
     SUSPENDED("Suspendida"),
     BANNED("Baneada");
