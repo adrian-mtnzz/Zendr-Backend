@@ -1,9 +1,9 @@
 package com.zendr.backend.internal.user.model;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -11,13 +11,11 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class Penalties {
+public class BanStatus {
 
-    @Valid
-    @Builder.Default
-    private int warnings = 0;
-
-    @Valid
     @NotNull
-    private BanStatus ban;
+    @Builder.Default
+    private boolean isBanned = false;
+
+    private Date expiresAt;
 }

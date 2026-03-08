@@ -1,17 +1,18 @@
 package com.zendr.backend.internal.user.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Builder;
-import java.util.Map;
+import jakarta.validation.Valid;
+import lombok.*;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Builder
 public class DeportiveProfile {
-
-    private Map<String, String> favDisciplines;
+    @Valid
+    private List<FavDisciplines> favDisciplines;
     private String previousInjuries;
 }
