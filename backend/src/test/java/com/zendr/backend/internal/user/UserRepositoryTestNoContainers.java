@@ -102,19 +102,15 @@ public class UserRepositoryTestNoContainers {
 
     @Test
     void shouldFindUserAndHaveQRCode() throws Exception {
-        // 1. Buscamos el usuario por el ID que generó MongoDB
         User result = userRepository.findById(savedUser.getId())
                 .orElseThrow(() -> new AssertionError("Usuario no encontrado"));
 
-        // 2. Verificamos que los datos básicos coincidan
         assertEquals("Sergio Ruiz", result.getName());
         assertEquals("sergioreactpro@gmail.com", result.getEmail());
 
-        // 3. VERIFICACIÓN CRÍTICA: ¿El QR se generó y se guardó?
         assertNotNull(result.getQRCode(), "El QR debería haberse generado en el Listener");
         assertEquals("QR_BASE64_TEST_DATA", result.getQRCode());
 
-        // Opcional: Verificar que el servicio se llamó exactamente 1 vez
         verify(qrService, times(1)).generateQRAsBase64(anyString());
     }
 }
