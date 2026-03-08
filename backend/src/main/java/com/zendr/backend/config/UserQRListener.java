@@ -4,7 +4,7 @@ import com.zendr.backend.internal.user.model.User;
 import com.zendr.backend.services.QRService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
-import org.springframework.data.mongodb.core.mapping.event.BeforeConvertEvent;
+import org.springframework.data.mongodb.core.mapping.event.BeforeSaveEvent;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,15 +14,20 @@ public class UserQRListener extends AbstractMongoEventListener<User> {
     private QRService qrService;
 
     @Override
-    public void onBeforeConvert(BeforeConvertEvent<User> event) {
+    public void onBeforeSave(BeforeSaveEvent<User> event) {
         User user = event.getSource();
+        org.bson.Document document = event.getDocument();
 
-        // El QR solo se genera si no existe ya uno para ese usuario
-        if (user.getQRCode() == null) {
+        if (user.getQRCode() == null && document != null) {
+            System.out.println("Generando QR para: " + user.getEmail());
             try {
-                // El QR se genera usando su email
                 String contenido = "Usuario: " + user.getEmail();
-                user.setQRCode(qrService.generateQRAsBase64(contenido));
+                String qrBase64 = qrService.generateQRAsBase64(contenido);
+
+                user.setQRCode(qrBase64);
+                document.put("QRCode", qrBase64);
+
+                System.out.println("QR inyectado correctamente en el documento de MongoDB.");
             } catch (Exception e) {
                 throw new RuntimeException("Error generando QR", e);
             }

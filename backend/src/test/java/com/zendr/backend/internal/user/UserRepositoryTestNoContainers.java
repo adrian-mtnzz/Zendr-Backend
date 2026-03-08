@@ -1,36 +1,48 @@
 package com.zendr.backend.internal.user;
 
+import com.zendr.backend.config.UserQRListener;
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import com.zendr.backend.internal.user.model.enums.SubcriptionStatus;
 import com.zendr.backend.internal.user.model.enums.SubscriptionType;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
+import com.zendr.backend.services.QRService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @DataMongoTest
 @ActiveProfiles("dev")
+@Import(UserQRListener.class)
 public class UserRepositoryTestNoContainers {
 
     @Autowired
     private UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
+    @MockitoBean
+    private QRService qrService;
 
+    private User savedUser;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        when(qrService.generateQRAsBase64(anyString())).thenReturn("QR_BASE64_TEST_DATA");
         userRepository.deleteAll();
 
         // CREACION DE UN USUARIO
@@ -85,18 +97,24 @@ public class UserRepositoryTestNoContainers {
                 .role(UserRole.ADMIN)
                 .build();
 
-        userRepository.save(user);
+        this.savedUser = userRepository.save(user);
     }
 
     @Test
-    void shouldFindUserById() {
+    void shouldFindUserAndHaveQRCode() throws Exception {
+        // 1. Buscamos el usuario por el ID que generó MongoDB
+        User result = userRepository.findById(savedUser.getId())
+                .orElseThrow(() -> new AssertionError("Usuario no encontrado"));
 
-        User user = userRepository.findByEmail("sergioreactpro@gmail.com")
-                .orElseThrow(() -> new AssertionError("Usuario no encontrado por email"));
-
-        User result = userRepository.findById(user.getId())
-                .orElseThrow(() -> new AssertionError("Usuario no encontrado por ID"));
-
+        // 2. Verificamos que los datos básicos coincidan
         assertEquals("Sergio Ruiz", result.getName());
+        assertEquals("sergioreactpro@gmail.com", result.getEmail());
+
+        // 3. VERIFICACIÓN CRÍTICA: ¿El QR se generó y se guardó?
+        assertNotNull(result.getQRCode(), "El QR debería haberse generado en el Listener");
+        assertEquals("QR_BASE64_TEST_DATA", result.getQRCode());
+
+        // Opcional: Verificar que el servicio se llamó exactamente 1 vez
+        verify(qrService, times(1)).generateQRAsBase64(anyString());
     }
 }
