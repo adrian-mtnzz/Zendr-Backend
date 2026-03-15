@@ -18,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -93,7 +92,7 @@ public class UserRepositoryTestNoContainers {
                 .deportiveProfile(dp)
                 .penalties(penalties)
                 .billingDetails(billingDetails)
-                .bod(LocalDate.of(1984, 1, 17))
+                .dob(LocalDate.of(1984, 1, 17))
                 .role(UserRole.ADMIN)
                 .build();
 

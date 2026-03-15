@@ -9,9 +9,9 @@ spring:
   mongodb:
     auto-index-creation: true
 
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
+  #jackson:
+    #serialization:
+      #writeDatesAsTimestamps: false
   #devtools:
   #  restart:
   #    enabled: false

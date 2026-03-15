@@ -60,7 +60,7 @@ public class User {
     private LocalDate createdAt;
 
     @NotNull
-    private LocalDate bod;
+    private LocalDate dob;
 
     @NotNull
     @Builder.Default

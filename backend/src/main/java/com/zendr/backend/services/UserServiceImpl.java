@@ -5,12 +5,11 @@ import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,94 +19,168 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repo;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User save(User user) {
+
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         return repo.save(user);
     }
 
     @Override
-    public List<User> findAll() {
-        return repo.findAll();
+    public List<UserDTO> findAll() {
+
+        return repo.findAll()
+                .stream()
+                .map(UserMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Optional<User> findById(String id) {
+    public Optional<UserDTO> findById(String id) {
+
+        return repo.findById(id).map(UserMapper::toDTO);
+    }
+
+    @Override
+    public Optional<User> findByIdRaw(String id) {
+
         return repo.findById(id);
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        return repo.findByUsername(username);
+    public Optional<UserDTO> findByUsername(String username) {
+
+        return repo.findByUsername(username).map(UserMapper::toDTO);
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return repo.findByEmail(email);
+    public Optional<UserDTO> findByEmail(String email) {
+
+        return repo.findByEmail(email).map(UserMapper::toDTO);
     }
 
     @Override
-    public List<User> findByRole(UserRole role) {
-        return repo.findByRole(role);
+    public List<UserDTO> findByRole(UserRole role) {
+
+        return repo.findByRole(role)
+                .stream()
+                .map(UserMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public List<User> findByDisciplineId(String disciplineId) {
-        return repo.findByDeportiveProfile_FavDisciplines_DisciplineId(disciplineId);
+    public List<UserDTO> findByDisciplineId(String disciplineId) {
+
+        return repo.findByDeportiveProfile_FavDisciplines_DisciplineId(disciplineId)
+                .stream()
+                .map(UserMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Optional<User> findByQRCode(String qrCode) {
-        return repo.findByQRCode(qrCode);
+    public Optional<UserDTO> findByQRCode(String qrCode) {
+
+        return repo.findByQRCode(qrCode)
+                .map(UserMapper::toDTO);
     }
 
     @Override
-    public Optional<User> updateUserDTO(String id, UserUpdateDTO dto) {
+    public Optional<String> getEmail(String id) {
+
+        return repo.findById(id)
+                .map(User::getEmail);
+    }
+
+    @Override
+    public Optional<String> getRole(String id) {
+
+        return repo.findById(id)
+                .map(user -> user.getRole().name());
+    }
+
+    @Override
+    public Optional<String> getQRCode(String id) {
+
+        return repo.findById(id)
+                .map(User::getQRCode);
+    }
+
+    @Override
+    public Optional<DeportiveProfile> getDeportiveProfile(String id) {
+
+        return repo.findById(id)
+                .map(User::getDeportiveProfile);
+    }
+
+    @Override
+    public Optional<Penalties> getPenalties(String id) {
+
+        return repo.findById(id)
+                .map(User::getPenalties);
+    }
+
+    @Override
+    public Optional<BillingDetails> getBillingDetails(String id) {
+
+        return repo.findById(id)
+                .map(User::getBillingDetails);
+    }
+
+    @Override
+    public Optional<UserDTO> updateUserFromDTO(String id, UserDTO dto) {
+
         return repo.findById(id).map(user -> {
 
+            if (dto.getUsername() != null && !repo.existsByUsername(dto.getUsername())) user.setUsername(dto.getUsername());
             if (dto.getName() != null) user.setName(dto.getName());
             if (dto.getSurname() != null) user.setSurname(dto.getSurname());
             if (dto.getProfileImg() != null) user.setProfileImg(dto.getProfileImg());
-            if (dto.getBod() != null) user.setBod(dto.getBod());
 
-            return repo.save(user);
+            return UserMapper.toDTO(repo.save(user));
         });
     }
 
     @Override
-    public Optional<User> updateEmail(String id, String email) {
+    public Optional<String> updateEmail(String id, String email) {
 
-        if (email == null || email.trim().isEmpty() || !email.contains("@")) {
+        if (email == null || email.trim().isEmpty() || !email.contains("@") || !email.contains(".")) {
             throw new IllegalArgumentException("El email no es válido");
         }
 
         return repo.findById(id).map(user -> {
-
-            if (repo.existsByEmail(email)) {
+            if (!email.equals(user.getEmail()) && repo.existsByEmail(email)) {
                 throw new RuntimeException("El email '" + email + "' ya está en uso");
             }
+
             user.setEmail(email);
-            return repo.save(user);
+            repo.save(user);
+
+            return user.getEmail();
         });
     }
 
     @Override
-    public Optional<User> updatePassword(String id, String password) {
+    public Optional<String> updatePassword(String id, String password) {
 
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("La contraseña no puede estar vacía");
         }
 
         return repo.findById(id).map(user -> {
+            user.setPassword(passwordEncoder.encode(password));
+            repo.save(user);
 
-            if (user.getPassword().equals(password)) return user;
-            user.setPassword(password);
-            return repo.save(user);
+            return "Contraseña actualizada";
         });
     }
 
     @Override
-    public Optional<User> updateUsername(String id, String username) {
+    public Optional<String> updateUsername(String id, String username) {
 
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("El username no puede estar vacío");
@@ -115,16 +188,19 @@ public class UserServiceImpl implements UserService {
 
         return repo.findById(id).map(user -> {
 
-            if (repo.existsByUsername(username)) {
+            if (!username.equals(user.getUsername()) && repo.existsByUsername(username)) {
                 throw new RuntimeException("El username '" + username + "' ya está en uso");
             }
+
             user.setUsername(username);
-            return repo.save(user);
+            repo.save(user);
+
+            return user.getUsername();
         });
     }
 
     @Override
-    public Optional<User> updateRole(String id, UserRole role) {
+    public Optional<String> updateRole(String id, UserRole role) {
 
         if (role == null) {
             throw new IllegalArgumentException("El rol no puede estar vacío");
@@ -132,56 +208,64 @@ public class UserServiceImpl implements UserService {
 
         return repo.findById(id).map(user -> {
 
-            if (user.getRole() == role) return user;
+            if (user.getRole() == role) return user.getRole().getDescription();
 
             user.setRole(role);
-            return repo.save(user);
+            repo.save(user);
+
+            return user.getRole().getDescription();
         });
     }
 
     @Override
-    public Optional<User> updateDeportiveProfile(String id, DeportiveProfile profile) {
+    public Optional<DeportiveProfile> updateDeportiveProfile(String id, DeportiveProfile profile) {
 
         Objects.requireNonNull(profile, "El perfil deportivo no puede ser nulo");
 
         return repo.findById(id).map(user -> {
+
             user.setDeportiveProfile(profile);
-            return repo.save(user);
+            repo.save(user);
+
+            return user.getDeportiveProfile();
         });
     }
 
     @Override
-    public Optional<User> updateFavDisciplines(String id, List<FavDisciplines> favDisciplines) {
-        Objects.requireNonNull(favDisciplines, "El objeto de disciplinas favoritas no puede ser nulo");
+    public Optional<DeportiveProfile> updateFavDisciplines(String id, List<FavDisciplines> favDisciplines) {
 
-        Objects.requireNonNull(favDisciplines, "La lista de disciplinas no puede ser nula");
+        Objects.requireNonNull(favDisciplines, "La lista de disciplinas favoritas no puede ser nula");
 
         return repo.findById(id).map(user -> {
-            // 2. Asegurar que existe el perfil deportivo
+
             if (user.getDeportiveProfile() == null) {
                 user.setDeportiveProfile(new DeportiveProfile());
             }
 
-            // 3. Reemplazo total de la lista
             user.getDeportiveProfile().setFavDisciplines(favDisciplines);
+            repo.save(user);
 
-            return repo.save(user);
+            return user.getDeportiveProfile();
         });
     }
 
     @Override
-    public Optional<User> updateBillingDetails(String id, BillingDetails details) {
+    public Optional<BillingDetails> updateBillingDetails(String id, BillingDetails details) {
 
         Objects.requireNonNull(details, "Los detalles de facturación no pueden ser nulos");
 
         return repo.findById(id).map(user -> {
+
             user.setBillingDetails(details);
-            return repo.save(user);
+            repo.save(user);
+
+            return user.getBillingDetails();
         });
     }
 
     @Override
-    public Optional<User> updateSubscription(String id, Subscription sub) {
+    public Optional<Subscription> updateSubscription(String id, Subscription sub) {
+
         Objects.requireNonNull(sub, "La suscripción no puede ser nula");
 
         return repo.findById(id).map(user -> {
@@ -191,7 +275,8 @@ public class UserServiceImpl implements UserService {
 
             } else throw new IllegalStateException("No se puede añadir una suscripción si el usuario no tiene stripeCustomerId");
 
-            return repo.save(user);
+            repo.save(user);
+            return user.getBillingDetails().getSubscription();
         });
     }
 
@@ -201,6 +286,14 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("No se puede eliminar: Usuario no encontrado con ID: " + id);
         }
         repo.deleteById(id);
+    }
+
+    @Override
+    public boolean checkPassword(String id, String password) {
+
+        return repo.findById(id)
+                .map(user -> passwordEncoder.matches(password, user.getPassword()))
+                .orElse(false);
     }
 
     @Override
@@ -219,7 +312,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> applyPenalty(String id) {
+    public Optional<Penalties> applyPenalty(String id) {
 
         return repo.findById(id).map(user -> {
 
@@ -228,14 +321,16 @@ public class UserServiceImpl implements UserService {
 
             if (user.getPenalties().getWarnings() >= 3) {
                 this.applyBanTrue(id);
+                user.getPenalties().setWarnings(0);
             }
 
-            return repo.save(user);
+            repo.save(user);
+            return user.getPenalties();
         });
     }
 
     @Override
-    public Optional<User> applyBanTrue(String id) {
+    public Optional<Penalties> applyBanTrue(String id) {
 
         return repo.findById(id).map(user -> {
 
@@ -243,12 +338,14 @@ public class UserServiceImpl implements UserService {
                 user.getPenalties().getBan().setBanned(true);
                 user.getPenalties().getBan().setExpiresAt(Instant.now().plus(30, ChronoUnit.DAYS));
             }
-            return repo.save(user);
+
+            repo.save(user);
+            return user.getPenalties();
         });
     }
 
     @Override
-    public Optional<User> applyBanFalse(String id) {
+    public Optional<Penalties> applyBanFalse(String id) {
 
         return repo.findById(id).map(user -> {
 
@@ -256,12 +353,14 @@ public class UserServiceImpl implements UserService {
                 user.getPenalties().getBan().setBanned(false);
                 user.getPenalties().getBan().setExpiresAt(null);
             }
-            return repo.save(user);
+
+            repo.save(user);
+            return user.getPenalties();
         });
     }
 
     @Override
-    public Optional<User> resetPenalties(String id) {
+    public Optional<Penalties> resetPenalties(String id) {
 
         return repo.findById(id).map(user -> {
 
@@ -270,13 +369,14 @@ public class UserServiceImpl implements UserService {
                     .ban(BanStatus.builder().isBanned(false).expiresAt(null).build())
                     .build());
 
-            return repo.save(user);
+            repo.save(user);
+            return user.getPenalties();
         });
     }
 
 
     @Override
-    public Optional<User> applyActiveSubscription(String id) {
+    public Optional<Subscription> applyActiveSubscription(String id) {
 
         return repo.findById(id).map(user -> {
 
@@ -287,30 +387,34 @@ public class UserServiceImpl implements UserService {
 
                 sub.setExpirationDate(Instant.now().plus(30, ChronoUnit.DAYS));
 
-                return repo.save(user);
+                repo.save(user);
+                return user.getBillingDetails().getSubscription();
             }
             throw new IllegalStateException("El usuario no tiene una suscripción configurada");
         });
     }
 
     @Override
-    public Optional<User> applySuspendedSuscription(String id) {
+    public Optional<Subscription> applySuspendedSuscription(String id) {
     // TODO: Cuando se aplique logica de transacciones aplicar intento de renovacion si selfRenewal es true
-        return repo.findById(id).map(user -> {
+        return repo.findById(id).flatMap(user -> {
 
             if (user.getBillingDetails() != null && user.getBillingDetails().getSubscription() != null) {
-                user.getBillingDetails().getSubscription().setStatus(SubscriptionStatus.SUSPENDED);
+                Subscription sub = user.getBillingDetails().getSubscription();
 
-                return repo.save(user);
+                sub.setStatus(SubscriptionStatus.SUSPENDED);
+
+                repo.save(user);
+                return Optional.of(user.getBillingDetails().getSubscription());
             }
-            return user;
+            return Optional.empty();
         });
     }
 
     @Override
-    public Optional<User> applyBannedSubscription(String id) {
+    public Optional<Subscription> applyBannedSubscription(String id) {
 
-        return repo.findById(id).map(user -> {
+        return repo.findById(id).flatMap(user -> {
 
             if (user.getBillingDetails() != null && user.getBillingDetails().getSubscription() != null) {
                 Subscription sub = user.getBillingDetails().getSubscription();
@@ -320,16 +424,16 @@ public class UserServiceImpl implements UserService {
                 sub.setSelfRenewal(false);
                 sub.setExpirationDate(Instant.now());
 
-                return repo.save(user);
+                repo.save(user);
+                return Optional.of(sub);
             }
 
-            // Si no tiene suscripción, no hay nada que banear en billingDetails
-            return user;
+            return Optional.empty();
         });
     }
 
     @Override
-    public Optional<User> toggleSelfRenewal(String id) {
+    public Optional<Subscription> toggleSelfRenewal(String id) {
 
         return repo.findById(id).map(user -> {
 
@@ -338,7 +442,9 @@ public class UserServiceImpl implements UserService {
 
                 sub.setSelfRenewal(!sub.isSelfRenewal());
             }
-            return repo.save(user);
+
+            repo.save(user);
+            return user.getBillingDetails().getSubscription();
         });
     }
 

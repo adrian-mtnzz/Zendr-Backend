@@ -101,7 +101,7 @@ public class UserRepositoryTest {
                 .penalties(penalties)
                 .billingDetails(billingDetails)
                 .createdAt(LocalDate.now())
-                .bod(LocalDate.of(1924, 1, 17))
+                .dob(LocalDate.of(1924, 1, 17))
                 .role(UserRole.ADMIN)
                 .build();
 

@@ -10,45 +10,55 @@ public interface UserService {
     // Creacion
     User save(User user);
 
-    // Busquedas
-    List<User> findAll();
-    Optional<User> findById(String id);
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
-    List<User> findByRole(UserRole role);
-    List<User> findByDisciplineId(String disciplineId);
-    Optional<User> findByQRCode(String qrCode);
+    // Busquedas DTO
+    List<UserDTO> findAll();
+    Optional<UserDTO> findById(String id);
+    Optional<User> findByIdRaw(String id);
+    Optional<UserDTO> findByUsername(String username);
+    Optional<UserDTO> findByEmail(String email);
+    List<UserDTO> findByRole(UserRole role);
+    List<UserDTO> findByDisciplineId(String disciplineId);
+    Optional<UserDTO> findByQRCode(String qrCode);
+
+    // Busquedas Parciales
+    Optional<String> getEmail(String id);
+    Optional<String> getRole(String id);
+    Optional<String> getQRCode(String id);
+    Optional<DeportiveProfile> getDeportiveProfile(String id);
+    Optional<Penalties> getPenalties(String id);
+    Optional<BillingDetails> getBillingDetails(String id);
 
     // Actualizar
-    Optional<User> updateUserDTO(String id, UserUpdateDTO dto);
-    Optional<User> updateEmail(String id, String email);
-    Optional<User> updatePassword(String id, String password);
-    Optional<User> updateUsername(String id, String username);
-    Optional<User> updateRole(String id, UserRole role);
-    Optional<User> updateDeportiveProfile(String id, DeportiveProfile profile);
-    Optional<User> updateFavDisciplines(String id, List<FavDisciplines> favDisciplines);
-    Optional<User> updateBillingDetails(String id, BillingDetails details);
-    Optional<User> updateSubscription(String id, Subscription sub);
+    Optional<UserDTO> updateUserFromDTO(String id, UserDTO dto);
+    Optional<String> updateEmail(String id, String email);
+    Optional<String> updatePassword(String id, String password);
+    Optional<String> updateUsername(String id, String username);
+    Optional<String> updateRole(String id, UserRole role);
+    Optional<DeportiveProfile> updateDeportiveProfile(String id, DeportiveProfile profile);
+    Optional<DeportiveProfile> updateFavDisciplines(String id, List<FavDisciplines> favDisciplines);
+    Optional<BillingDetails> updateBillingDetails(String id, BillingDetails details);
+    Optional<Subscription> updateSubscription(String id, Subscription sub);
 
     // Eliminar
     void deleteById(String id);
 
     // Checks
+    boolean checkPassword(String id, String password);
     boolean existsByEmail(String email);
     boolean existsById(String id);
     boolean existsByUsername(String username);
 
     // Penalizaciones
-    Optional<User> applyPenalty(String id);
-    Optional<User> applyBanTrue(String id);
-    Optional<User> resetPenalties(String id);
-    Optional<User> applyBanFalse(String id);
+    Optional<Penalties> applyPenalty(String id);
+    Optional<Penalties> applyBanTrue(String id);
+    Optional<Penalties> resetPenalties(String id);
+    Optional<Penalties> applyBanFalse(String id);
 
     // Subscripcion
-    Optional<User> applyActiveSubscription(String id);
-    Optional<User> applySuspendedSuscription(String id);
-    Optional<User> applyBannedSubscription(String id);
-    Optional<User> toggleSelfRenewal(String id);
+    Optional<Subscription> applyActiveSubscription(String id);
+    Optional<Subscription> applySuspendedSuscription(String id);
+    Optional<Subscription> applyBannedSubscription(String id);
+    Optional<Subscription> toggleSelfRenewal(String id);
 
     // TODO: Aplicar logica de transacciones
 
