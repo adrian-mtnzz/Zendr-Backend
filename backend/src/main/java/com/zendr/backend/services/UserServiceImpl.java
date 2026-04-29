@@ -316,12 +316,19 @@ public class UserServiceImpl implements UserService {
 
         return repo.findById(id).map(user -> {
 
-            int currentWarnings = user.getPenalties().getWarnings();
-            user.getPenalties().setWarnings(currentWarnings + 1);
+            if (user.getPenalties() == null) {
+                user.setPenalties(Penalties.builder()
+                        .warnings(0)
+                        .ban(new BanStatus(false,null))
+                        .build());
+            }
 
-            if (user.getPenalties().getWarnings() >= 3) {
+            Penalties penalties = user.getPenalties();
+            penalties.setWarnings(penalties.getWarnings() + 1);
+
+            if (penalties.getWarnings() >= 3) {
                 this.applyBanTrue(id);
-                user.getPenalties().setWarnings(0);
+                penalties.setWarnings(0);
             }
 
             repo.save(user);

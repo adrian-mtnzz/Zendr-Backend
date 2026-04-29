@@ -97,6 +97,36 @@ public class UserController {
     }
 
 
+    @GetMapping("/{id}/details")
+    public ResponseEntity<Map<String, Object>> getUserDetails(
+            @PathVariable String id,
+            @RequestParam(required = false) Boolean email,
+            @RequestParam(required = false) Boolean deportiveProfile,
+            @RequestParam(required = false) Boolean penalties,
+            @RequestParam(required = false) Boolean billingDetails,
+            @RequestParam(required = false) Boolean role,
+            @RequestParam(required = false) Boolean qrcode) {
+
+        Optional<User> userOpt = service.findByIdRaw(id);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOpt.get();
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        if (Boolean.TRUE.equals(email)) response.put("email", user.getEmail());
+        if (Boolean.TRUE.equals(deportiveProfile)) response.put("deportiveProfile", user.getDeportiveProfile());
+        if (Boolean.TRUE.equals(penalties)) response.put("penalties", user.getPenalties());
+        if (Boolean.TRUE.equals(billingDetails)) response.put("billingDetails", user.getBillingDetails());
+        if (Boolean.TRUE.equals(role)) response.put("role", user.getRole());
+        if (Boolean.TRUE.equals(qrcode)) response.put("QRCode", user.getQRCode());
+
+        return ResponseEntity.ok(response);
+    }
+
+
     @GetMapping("/validate")
     public ResponseEntity<Map<String, Boolean>> validateUniqueParams(
             @RequestParam(required = false) String username,
@@ -117,36 +147,6 @@ public class UserController {
         }
 
         return ResponseEntity.ok(result);
-    }
-
-
-    @GetMapping("/{id}/details")
-    public ResponseEntity<Map<String, Object>> getUserDetails(
-            @PathVariable String id,
-            @RequestParam(required = false) Boolean email,
-            @RequestParam(required = false) Boolean deportiveProfile,
-            @RequestParam(required = false) Boolean penalties,
-            @RequestParam(required = false) Boolean billingDetails,
-            @RequestParam(required = false) Boolean role,
-            @RequestParam(required = false) Boolean qrcode) {
-
-        Optional<User> userOpt = service.findByIdRaw(id);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        User user = userOpt.get();
-        Map<String, Object> response = new HashMap<>();
-
-        if (Boolean.TRUE.equals(email)) response.put("email", user.getEmail());
-        if (Boolean.TRUE.equals(deportiveProfile)) response.put("deportiveProfile", user.getDeportiveProfile());
-        if (Boolean.TRUE.equals(penalties)) response.put("penalties", user.getPenalties());
-        if (Boolean.TRUE.equals(billingDetails)) response.put("billingDetails", user.getBillingDetails());
-        if (Boolean.TRUE.equals(role)) response.put("role", user.getRole());
-        if (Boolean.TRUE.equals(qrcode)) response.put("QRCode", user.getQRCode());
-
-        return ResponseEntity.ok(response);
     }
 
 
