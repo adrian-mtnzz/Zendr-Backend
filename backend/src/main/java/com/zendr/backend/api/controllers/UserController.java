@@ -105,6 +105,7 @@ public class UserController {
             @RequestParam(required = false) Boolean penalties,
             @RequestParam(required = false) Boolean billingDetails,
             @RequestParam(required = false) Boolean role,
+            @RequestParam(required = false) Boolean dob,
             @RequestParam(required = false) Boolean qrcode) {
 
         Optional<User> userOpt = service.findByIdRaw(id);
@@ -121,6 +122,7 @@ public class UserController {
         if (Boolean.TRUE.equals(penalties)) response.put("penalties", user.getPenalties());
         if (Boolean.TRUE.equals(billingDetails)) response.put("billingDetails", user.getBillingDetails());
         if (Boolean.TRUE.equals(role)) response.put("role", user.getRole());
+        if (Boolean.TRUE.equals(dob)) response.put("dob", user.getDob());
         if (Boolean.TRUE.equals(qrcode)) response.put("QRCode", user.getQRCode());
 
         return ResponseEntity.ok(response);

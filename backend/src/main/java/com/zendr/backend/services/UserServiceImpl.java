@@ -23,11 +23,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(User user) {
-
+        
+        if (user.getUsername() == null || existsByUsername(user.getUsername())) {
+            throw new IllegalArgumentException("El nombre de usuario no es válido");
+        }
+        
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-
+        user.setRole(UserRole.USER);
+        
         return repo.save(user);
     }
 

@@ -62,7 +62,6 @@ public class User {
     @NotNull
     private LocalDate dob;
 
-    @NotNull
     @Builder.Default
     @NotNull(message = "El rol no puede estar vacío")
     private UserRole role = UserRole.USER;
@@ -70,4 +69,5 @@ public class User {
     @Indexed(unique = true, sparse = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String QRCode;
+    
 }
