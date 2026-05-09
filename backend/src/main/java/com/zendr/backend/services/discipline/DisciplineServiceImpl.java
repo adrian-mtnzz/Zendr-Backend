@@ -19,7 +19,13 @@ public class DisciplineServiceImpl implements DisciplineService {
         if (repo.existsByNameContainingIgnoreCase(discipline.getName()).isPresent()) throw new IllegalArgumentException(
                 "El nombre de la disciplina no es válido. Ya existe una disciplina con ese nombre"
         );
-        discipline.setName(discipline.getName().trim().toLowerCase());
+        
+        String name = discipline.getName();
+        if (name != null) {
+            name = name.trim().toLowerCase();
+            name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+            discipline.setName(name);
+        }
         return repo.save(discipline);
     }
     
