@@ -171,14 +171,23 @@ public class UserController {
 
 
     @PatchMapping("/reset-password")
-    public ResponseEntity<Map<String, Boolean>> updatePassword(@RequestParam String code, @RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<Map<String, Boolean>> updatePassword(@RequestBody Map<String, String> body) {
+        
+        String email = body.get("email");
+        String code = body.get("code");
+        String password = body.get("password");
         
         Map<String, Boolean> response = new HashMap<>();
-        response.put("updated", service.updatePassword(code, email, password));
+        
+        response.put(
+                "updated",
+                service.updatePassword(code, email, password)
+        );
+        
         return ResponseEntity.ok(response);
     }
 
-
+    
     @PatchMapping("/{id}/username")
     public ResponseEntity<String> updateUsername(@PathVariable String id, @RequestParam String username) {
 
