@@ -50,7 +50,6 @@ public class User {
     private DeportiveProfile deportiveProfile;
 
     @Valid
-    @NotNull(message = "Las penalizaciones no pueden estar vacías")
     private Penalties penalties;
 
     @Valid
@@ -63,7 +62,6 @@ public class User {
     private LocalDate dob;
 
     @Builder.Default
-    @NotNull(message = "El rol no puede estar vacío")
     private UserRole role = UserRole.USER;
 
     @Indexed(unique = true, sparse = true)

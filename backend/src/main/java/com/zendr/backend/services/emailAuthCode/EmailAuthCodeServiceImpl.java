@@ -2,6 +2,8 @@ package com.zendr.backend.services.emailAuthCode;
 
 import com.zendr.backend.internal.emailAuthCode.model.EmailAuthCode;
 import com.zendr.backend.internal.emailAuthCode.repository.EmailAuthCodeRepository;
+import com.zendr.backend.internal.user.repository.UserRepository;
+import com.zendr.backend.services.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +17,13 @@ public class EmailAuthCodeServiceImpl implements EmailAuthCodeService {
     
     private final EmailAuthCodeRepository repository;
     private final EmailService emailService;
+    private final UserRepository userRepository;
     
     @Override
     public Optional<Instant> generateCode(String email) {
         
-        if (!repository.existsByEmail(email)) return Optional.empty();
+        if (!userRepository.existsByEmail(email)) return Optional.empty();
+        
         repository.deleteByEmail(email);
         
         String code = generateRandomCode();

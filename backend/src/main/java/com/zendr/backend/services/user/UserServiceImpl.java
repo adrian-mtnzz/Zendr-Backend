@@ -8,6 +8,7 @@ import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -172,25 +173,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean updatePassword(String code, String email, String password) {
-
+        
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("La contraseña no puede estar vacía");
         }
-        
         if (code == null || code.trim().isEmpty() || code.length() != 6) {
             throw new IllegalArgumentException("El codigo no es válido");
         }
         
-        repo.findByEmail(email).map(user -> {
-            
-            authCodeService.validateCode(email, code);
-            user.setPassword(passwordEncoder.encode(password));
-            repo.save(user);
-            return true;
-        });
+        Optional<User> optionalUser = repo.findByEmail(email);
         
-        return false;
+        if (optionalUser.isEmpty()) return false;
+        boolean validCode = authCodeService.validateCode(email, code);
+        
+        if (!validCode) return false;
+        
+        User user = optionalUser.get();
+        user.setPassword(passwordEncoder.encode(password));
+        
+        repo.save(user);
+        return true;
     }
 
     @Override

@@ -3,10 +3,7 @@ package com.zendr.backend.api.controllers;
 import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -20,7 +17,7 @@ public class EmailAuthCodeController {
     private final EmailAuthCodeService service;
     
     @PostMapping
-    public ResponseEntity<Map<String, Instant>> sendAuthCode(@RequestBody String email) {
+    public ResponseEntity<Map<String, Instant>> sendAuthCode(@RequestParam String email) {
         
         Map<String, Instant> response = new HashMap<>();
         
