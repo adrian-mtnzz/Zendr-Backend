@@ -1,6 +1,4 @@
-package com.zendr.backend.services.EmailAuthCode;
-
-import com.zendr.backend.internal.emailAuthCode.model.EmailAuthCode;
+package com.zendr.backend.services.emailAuthCode;
 
 import java.time.Instant;
 import java.util.Optional;

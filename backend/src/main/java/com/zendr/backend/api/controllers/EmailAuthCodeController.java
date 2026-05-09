@@ -1,19 +1,13 @@
 package com.zendr.backend.api.controllers;
 
-import com.zendr.backend.internal.user.model.User;
-import com.zendr.backend.internal.user.model.UserDTO;
-import com.zendr.backend.internal.user.model.UserMapper;
-import com.zendr.backend.services.EmailAuthCode.EmailAuthCodeService;
-import jakarta.validation.Valid;
+import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;

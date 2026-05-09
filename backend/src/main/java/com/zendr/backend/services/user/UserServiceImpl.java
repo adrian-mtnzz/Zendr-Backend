@@ -4,7 +4,7 @@ import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
-import com.zendr.backend.services.EmailAuthCode.EmailAuthCodeService;
+import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.zendr.backend.services.EmailAuthCode;
+package com.zendr.backend.services.emailAuthCode;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

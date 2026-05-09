@@ -1,4 +1,4 @@
-package com.zendr.backend.services.EmailAuthCode;
+package com.zendr.backend.services.emailAuthCode;
 
 import com.zendr.backend.internal.emailAuthCode.model.EmailAuthCode;
 import com.zendr.backend.internal.emailAuthCode.repository.EmailAuthCodeRepository;
