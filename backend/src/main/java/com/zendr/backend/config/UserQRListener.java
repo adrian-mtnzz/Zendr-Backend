@@ -1,7 +1,7 @@
 package com.zendr.backend.config;
 
 import com.zendr.backend.internal.user.model.User;
-import com.zendr.backend.services.QRService;
+import com.zendr.backend.services.qr.QRService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.event.AbstractMongoEventListener;
 import org.springframework.data.mongodb.core.mapping.event.BeforeSaveEvent;

@@ -3,7 +3,7 @@ package com.zendr.backend.api.controllers;
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.UserRole;
-import com.zendr.backend.services.UserService;
+import com.zendr.backend.services.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -171,11 +171,11 @@ public class UserController {
 
 
     @PatchMapping("/{id}/password")
-    public ResponseEntity<String> updatePassword(@PathVariable String id, @RequestParam String password) {
-
-        return service.updatePassword(id, password)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Map<String, Boolean>> updatePassword(@PathVariable String id, @RequestParam String code, @RequestParam String email, @RequestParam String password) {
+        
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("updated", service.updatePassword(code, email, password));
+        return ResponseEntity.ok(response);
     }
 
 

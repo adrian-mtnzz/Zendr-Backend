@@ -1,4 +1,4 @@
-package com.zendr.backend.services;
+package com.zendr.backend.services.user;
 
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.UserRole;
@@ -31,7 +31,7 @@ public interface UserService {
     // Actualizar
     Optional<UserDTO> updateUserFromDTO(String id, UserDTO dto);
     Optional<String> updateEmail(String id, String email);
-    Optional<String> updatePassword(String id, String password);
+    boolean updatePassword(String code, String email, String password);
     Optional<String> updateUsername(String id, String username);
     Optional<String> updateRole(String id, UserRole role);
     Optional<DeportiveProfile> updateDeportiveProfile(String id, DeportiveProfile profile);

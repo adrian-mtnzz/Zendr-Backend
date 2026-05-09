@@ -1,8 +1,7 @@
 package com.zendr.backend.api.controllers;
 
 import com.zendr.backend.internal.discipline.model.Discipline;
-import com.zendr.backend.internal.user.model.UserDTO;
-import com.zendr.backend.services.DisciplineService;
+import com.zendr.backend.services.discipline.DisciplineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

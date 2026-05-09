@@ -7,7 +7,7 @@ import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.SubscriptionType;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
-import com.zendr.backend.services.QRService;
+import com.zendr.backend.services.qr.QRService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

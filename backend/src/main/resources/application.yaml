@@ -9,6 +9,18 @@ spring:
   mongodb:
     auto-index-creation: true
 
+  mail:
+    host: {ZENDR_SMTP_HOST}
+    port: {ZENDR_SMTP_PORT}
+    username: {ZENDER_SMTP_EMAIL}
+    password: {ZENDER_SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   #jackson:
     #serialization:
       #writeDatesAsTimestamps: false

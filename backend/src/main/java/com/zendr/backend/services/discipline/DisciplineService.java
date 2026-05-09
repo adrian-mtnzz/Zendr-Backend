@@ -1,4 +1,4 @@
-package com.zendr.backend.services;
+package com.zendr.backend.services.discipline;
 
 import com.zendr.backend.internal.discipline.model.Discipline;
 

@@ -1,4 +1,4 @@
-package com.zendr.backend.services;
+package com.zendr.backend.services.qr;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;

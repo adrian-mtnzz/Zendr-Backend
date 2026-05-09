@@ -1,9 +1,10 @@
-package com.zendr.backend.services;
+package com.zendr.backend.services.user;
 
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
+import com.zendr.backend.services.EmailAuthCode.EmailAuthCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repo;
     private final PasswordEncoder passwordEncoder;
+    private final EmailAuthCodeService authCodeService;
 
     @Override
     public User save(User user) {
@@ -170,18 +172,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<String> updatePassword(String id, String password) {
+    public boolean updatePassword(String code, String email, String password) {
 
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("La contraseña no puede estar vacía");
         }
-
-        return repo.findById(id).map(user -> {
+        
+        if (code == null || code.trim().isEmpty() || code.length() != 6) {
+            throw new IllegalArgumentException("El codigo no es válido");
+        }
+        
+        repo.findByEmail(email).map(user -> {
+            
+            authCodeService.validateCode(email, code);
             user.setPassword(passwordEncoder.encode(password));
             repo.save(user);
-
-            return "Contraseña actualizada";
+            return true;
         });
+        
+        return false;
     }
 
     @Override

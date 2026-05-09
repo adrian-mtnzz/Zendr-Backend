@@ -17,7 +17,7 @@ public class Discipline {
     
     @Id
     @Setter(AccessLevel.NONE)
-    String id;
+    private String id;
     
     @NotNull(message = "El nombre no puede estar vacío")
     private String name;
