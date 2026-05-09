@@ -3,6 +3,7 @@ package com.zendr.backend.internal.discipline.model;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Data
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 @Getter
 @Setter
 @Builder
+@Document(collection = "disciplines")
 public class Discipline {
     
     @Id
