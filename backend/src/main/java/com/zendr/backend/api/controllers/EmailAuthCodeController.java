@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/authCode")
+@RequestMapping("/auth/auth-code")
 @RequiredArgsConstructor
 public class EmailAuthCodeController {
     

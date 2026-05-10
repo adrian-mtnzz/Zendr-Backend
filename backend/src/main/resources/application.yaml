@@ -1,12 +1,6 @@
 spring:
   application:
     name: backend
-    security:
-      jwt:
-        secret-key: ${ZENDR_JWT_SECRET_KEY}
-        expiration: 86400000 # 1 day
-        refresh-token:
-          expiration: 604800000 # 7 days
 
   output:
     ansi:
@@ -26,6 +20,14 @@ spring:
           auth: true
           starttls:
             enable: true
+
+application:
+  security:
+    jwt:
+      secret-key: ${ZENDR_JWT_SECRET_KEY}
+      expiration: 86400000 # 1 day
+      refresh-token:
+        expiration: 604800000 # 7 days
 
   #jackson:
     #serialization:

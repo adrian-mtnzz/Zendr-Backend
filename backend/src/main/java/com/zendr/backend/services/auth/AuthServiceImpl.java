@@ -7,6 +7,7 @@ import com.zendr.backend.internal.token.model.Token;
 import com.zendr.backend.internal.token.model.TokenResponse;
 import com.zendr.backend.internal.token.repository.TokenRepository;
 import com.zendr.backend.internal.user.model.User;
+import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
 import com.zendr.backend.services.device.DeviceService;
 import jakarta.validation.constraints.NotNull;
@@ -19,11 +20,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AuthServiceImpl {
+public class AuthServiceImpl implements AuthService {
     private final UserRepository repository;
     private final DeviceService deviceService;
     private final TokenRepository tokenRepository;
@@ -35,10 +37,23 @@ public class AuthServiceImpl {
     private long jwtExpiration;
     
     public TokenResponse register(final RegisterRequest request) {
-        final User user = User.builder().build();
-        // TODO meter en el RegisterRequest todos los campos necesarios de user y hacer validaciones
-        // como en UserService save();
-        // Meter tambien los necesarios en device
+        
+        if (request.username() == null || repository.existsByUsername(request.username())) {
+            throw new IllegalArgumentException("El nombre de usuario no es válido");
+        }
+        
+        User user = User.builder()
+                .username(request.username())
+                .name(request.name())
+                .surname(request.surname())
+                .profileImg(request.profileImg())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .deportiveProfile(request.deportiveProfile())
+                .dob(request.dob())
+                .role(UserRole.USER)
+                .createdAt(LocalDate.now())
+                .build();
         
         final User savedUser = repository.save(user);
         
@@ -49,11 +64,11 @@ public class AuthServiceImpl {
                 request.ipAddress()
         );
         
-        final String jwtToken = jwtService.generateToken(savedUser);
+        final String accessToken = jwtService.generateToken(savedUser);
         final String refreshToken = jwtService.generateRefreshToken(savedUser);
         
         saveUserToken(savedUser, refreshToken, savedDevice.getId());
-        return new TokenResponse(jwtToken, refreshToken);
+        return new TokenResponse(accessToken, refreshToken, user.getId(), savedDevice.getId());
     }
     
     
@@ -68,11 +83,34 @@ public class AuthServiceImpl {
                 () -> new IllegalArgumentException("Usuario no encontrado")
         );
         
+        String deviceId = null;
+        
+            if (request.deviceId() != null && deviceService.findById(request.deviceId()) != null) {
+                deviceId = request.deviceId();
+            }
+            
+            else if (
+                request.deviceId() == null &&
+                request.deviceModel() != null &&
+                request.platform() != null &&
+                request.ipAddress() != null
+            ) {
+                final Device savedDevice = deviceService.save(
+                        user.getId(),
+                        request.platform(),
+                        request.deviceModel(),
+                        request.ipAddress()
+                );
+                deviceId = savedDevice.getId();
+                
+            } else throw new IllegalArgumentException("Los datos del dispositivo no son válidos");
+        
         final String accessToken = jwtService.generateToken(user);
         final String refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user.getId());
         
-        return new TokenResponse(accessToken, refreshToken);
+        revokeAllUserTokens(user.getId());
+        saveUserToken(user, refreshToken, deviceId);
+        return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId);
     }
     
     
@@ -118,15 +156,15 @@ public class AuthServiceImpl {
                 () -> new UsernameNotFoundException("No se ha encontrado el usuario")
         );
         
+        String deviceId = deviceService.findByUserId(user.getId()).getId();
+        
         final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
         if (!isTokenValid) return null;
-        
-        final String deviceId = deviceService.findByUserId(user.getId()).getId();
         
         final String accessToken = jwtService.generateRefreshToken(user);
         
         revokeAllUserTokens(user.getId());
         
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId);
     }
 }

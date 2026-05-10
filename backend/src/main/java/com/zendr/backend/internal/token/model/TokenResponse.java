@@ -6,6 +6,9 @@ public record TokenResponse(
     @JsonProperty("access_token")
     String accessToken,
     @JsonProperty("refresh_token")
-    String refreshToken
+    String refreshToken,
+    String userId,
+    @JsonProperty("device_id")
+    String deviceId
 ) {
 }

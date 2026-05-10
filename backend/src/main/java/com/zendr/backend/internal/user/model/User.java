@@ -3,6 +3,7 @@ package com.zendr.backend.internal.user.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -40,6 +41,7 @@ public class User {
     private String profileImg;
 
     @NotNull(message = "El email no puede estar vacío")
+    @Email(message = "El email no es válido")
     @Indexed(unique = true)
     private String email;
 

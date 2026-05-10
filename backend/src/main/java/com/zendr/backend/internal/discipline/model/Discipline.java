@@ -21,4 +21,8 @@ public class Discipline {
     
     @NotNull(message = "El nombre no puede estar vacío")
     private String name;
+    
+    private String iconDark;
+    
+    private String iconLight;
 }

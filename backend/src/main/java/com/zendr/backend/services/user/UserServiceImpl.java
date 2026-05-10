@@ -27,9 +27,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         
-        if (user.getUsername() == null || existsByUsername(user.getUsername())) {
-            throw new IllegalArgumentException("El nombre de usuario no es válido");
-        }
+        if (user.getUsername() == null) throw new IllegalArgumentException("El nombre de usuario no puede estar vacío");
+        if (existsByUsername(user.getUsername())) throw new IllegalArgumentException("El nombre de usuario ya existe");
+        
+        if (user.getEmail() == null) throw new IllegalArgumentException("El email no puede estar vacío");
+        if (existsByEmail(user.getEmail())) throw new IllegalArgumentException("El email de usuario ya existe");
         
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));

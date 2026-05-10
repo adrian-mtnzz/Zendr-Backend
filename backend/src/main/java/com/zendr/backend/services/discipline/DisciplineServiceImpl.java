@@ -16,7 +16,7 @@ public class DisciplineServiceImpl implements DisciplineService {
     
     @Override
     public Discipline save(Discipline discipline) {
-        if (repo.existsByNameContainingIgnoreCase(discipline.getName()).isPresent()) throw new IllegalArgumentException(
+        if (repo.existsByNameIgnoreCase(discipline.getName())) throw new IllegalArgumentException(
                 "El nombre de la disciplina no es válido. Ya existe una disciplina con ese nombre"
         );
         

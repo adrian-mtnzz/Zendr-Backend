@@ -34,7 +34,7 @@ public class DisciplineController {
     
     @GetMapping()
     public ResponseEntity<List<Discipline>> getAllDisciplines() {
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok().body(service.findAll());
     }
     
     @GetMapping("/{id}")

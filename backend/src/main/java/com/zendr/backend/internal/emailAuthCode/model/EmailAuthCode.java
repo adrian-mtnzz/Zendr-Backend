@@ -49,8 +49,11 @@ public class EmailAuthCode {
     }
     
     public void increaseAttempts() {
-        this.attemptsCounter++;
-        if (this.attemptsCounter > 5) revoke();
+        if (this.attemptsCounter > 4) {
+            revoke();
+        } else {
+            this.attemptsCounter++;
+        };
     }
     
     public void revoke() {

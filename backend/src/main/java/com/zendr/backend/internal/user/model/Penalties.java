@@ -12,12 +12,12 @@ import lombok.*;
 @Setter
 @Builder
 public class Penalties {
-
+    
     @Valid
     @Builder.Default
     private int warnings = 0;
 
     @Valid
-    @NotNull
+    @NotNull(message = "Ban status es obligatorio")
     private BanStatus ban;
 }
