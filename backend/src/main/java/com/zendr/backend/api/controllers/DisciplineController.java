@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/disciplines")
+@RequestMapping("/auth/disciplines")
 @RequiredArgsConstructor
 public class DisciplineController {
     
