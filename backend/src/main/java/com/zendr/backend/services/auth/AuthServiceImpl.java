@@ -10,6 +10,7 @@ import com.zendr.backend.internal.user.model.User;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
 import com.zendr.backend.services.device.DeviceService;
+import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final DeviceService deviceService;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
+    private final EmailAuthCodeService authCodeService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     
@@ -39,8 +41,18 @@ public class AuthServiceImpl implements AuthService {
     
     public TokenResponse register(final RegisterRequest request) {
         
+        
+        
         if (request.username() == null || repository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("El nombre de usuario no es válido");
+        }
+        
+        if (request.email() == null || request.code() == null) {
+            throw new IllegalArgumentException("No se ha podido verificar el código");
+        }
+        
+        if (!authCodeService.validateCode(request.email(), request.code())) {
+            throw new IllegalArgumentException("Código incorrecto");
         }
         
         User user = User.builder()

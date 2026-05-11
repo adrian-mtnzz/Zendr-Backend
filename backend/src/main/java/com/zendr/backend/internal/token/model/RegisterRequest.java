@@ -42,6 +42,9 @@ public record RegisterRequest(
         String deviceModel,
         
         @NotNull(message = "La dirección ip del dispositivo es obligatoria")
-        String ipAddress
+        String ipAddress,
+        
+        @NotNull(message = "El código de verificación no puede ser nulo")
+        String code
 ) {
 }

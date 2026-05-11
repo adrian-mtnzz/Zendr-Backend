@@ -1,5 +1,6 @@
 package com.zendr.backend.services.user;
 
+import com.zendr.backend.internal.discipline.repository.DisciplineRepository;
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.UserRole;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repo;
+    private final DisciplineRepository disciplineRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailAuthCodeService authCodeService;
 
@@ -150,7 +152,6 @@ public class UserServiceImpl implements UserService {
             if (dto.getName() != null) user.setName(dto.getName());
             if (dto.getSurname() != null) user.setSurname(dto.getSurname());
             if (dto.getProfileImg() != null) user.setProfileImg(dto.getProfileImg());
-
             return UserMapper.toDTO(repo.save(user));
         });
     }
@@ -259,8 +260,10 @@ public class UserServiceImpl implements UserService {
         return repo.findById(id).map(user -> {
 
             if (user.getDeportiveProfile() == null) {
+                
                 user.setDeportiveProfile(new DeportiveProfile());
             }
+            
 
             user.getDeportiveProfile().setFavDisciplines(favDisciplines);
             repo.save(user);

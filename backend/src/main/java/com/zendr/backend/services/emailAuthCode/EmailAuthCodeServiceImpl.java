@@ -22,8 +22,6 @@ public class EmailAuthCodeServiceImpl implements EmailAuthCodeService {
     @Override
     public Optional<Instant> generateCode(String email) {
         
-        if (!userRepository.existsByEmail(email)) return Optional.empty();
-        
         repository.deleteByEmail(email);
         
         String code = generateRandomCode();
