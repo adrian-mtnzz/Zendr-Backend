@@ -6,6 +6,7 @@ public record TokenResponse(
     String accessToken,
     String refreshToken,
     String userId,
-    String deviceId
+    String deviceId,
+    String role
 ) {
 }

@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
         final String refreshToken = jwtService.generateRefreshToken(savedUser);
         
         saveUserToken(savedUser, refreshToken, savedDevice.getId());
-        return new TokenResponse(accessToken, refreshToken, user.getId(), savedDevice.getId());
+        return new TokenResponse(accessToken, refreshToken, user.getId(), savedDevice.getId(), savedUser.getRole().getDescription());
     }
     
     
@@ -125,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
         
         revokeAllUserTokens(user.getId());
         saveUserToken(user, refreshToken, deviceId);
-        return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId);
+        return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId, user.getRole().getDescription());
     }
     
     
@@ -185,6 +185,6 @@ public class AuthServiceImpl implements AuthService {
         final String accessToken = jwtService.generateToken(user);
         revokeAllUserTokens(user.getId());
         
-        return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId);
+        return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId, user.getRole().getDescription());
     }
 }
