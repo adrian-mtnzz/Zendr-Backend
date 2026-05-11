@@ -7,6 +7,8 @@ spring:
       enabled: always
 
   mongodb:
+    uri: ${ZENDR_DB_URI}
+    database: "test_db"
     auto-index-creation: true
 
   mail:
