@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
         if (user.getDeportiveProfile() != null && user.getDeportiveProfile().getFavDisciplines() != null) {
             boolean isFavDisciplinesValid = user.getDeportiveProfile().getFavDisciplines().stream().allMatch(
                     discipline -> disciplineRepository.existsById(discipline.getDisciplineId())
-                    
             );
             if (!isFavDisciplinesValid) throw new IllegalArgumentException("Las disiciplinas no son válidas");
         }

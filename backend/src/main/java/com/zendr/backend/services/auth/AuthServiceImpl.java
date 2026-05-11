@@ -62,7 +62,6 @@ public class AuthServiceImpl implements AuthService {
         if (request.deportiveProfile() != null && request.deportiveProfile().getFavDisciplines() != null) {
             boolean isFavDisciplinesValid = request.deportiveProfile().getFavDisciplines().stream().allMatch(
                     discipline -> disciplineRepository.existsById(discipline.getDisciplineId())
-            
             );
             if (!isFavDisciplinesValid) throw new IllegalArgumentException("Las disiciplinas no son válidas");
         }
