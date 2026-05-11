@@ -1,6 +1,7 @@
 package com.zendr.backend.services.auth;
 
 import com.zendr.backend.internal.device.model.Device;
+import com.zendr.backend.internal.discipline.repository.DisciplineRepository;
 import com.zendr.backend.internal.token.model.AuthRequest;
 import com.zendr.backend.internal.token.model.RegisterRequest;
 import com.zendr.backend.internal.token.model.Token;
@@ -29,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserRepository repository;
+    private final DisciplineRepository disciplineRepository;
     private final DeviceService deviceService;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
@@ -41,14 +43,28 @@ public class AuthServiceImpl implements AuthService {
     
     public TokenResponse register(final RegisterRequest request) {
         
-        
-        
         if (request.username() == null || repository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("El nombre de usuario no es válido");
         }
         
         if (request.email() == null || request.code() == null) {
             throw new IllegalArgumentException("No se ha podido verificar el código");
+        }
+        
+        if (request.password() == null) throw new IllegalArgumentException("La contraseña no puede estar vacía");
+        
+        String password = request.password();
+        
+        if (password.startsWith("$2a$")) {
+                password = passwordEncoder.encode(request.password());
+        }
+        
+        if (request.deportiveProfile() != null && request.deportiveProfile().getFavDisciplines() != null) {
+            boolean isFavDisciplinesValid = request.deportiveProfile().getFavDisciplines().stream().allMatch(
+                    discipline -> disciplineRepository.existsById(discipline.getDisciplineId())
+            
+            );
+            if (!isFavDisciplinesValid) throw new IllegalArgumentException("Las disiciplinas no son válidas");
         }
         
         if (!authCodeService.validateCode(request.email(), request.code())) {
@@ -61,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
                 .surname(request.surname())
                 .profileImg(request.profileImg())
                 .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
+                .password(passwordEncoder.encode(password))
                 .deportiveProfile(request.deportiveProfile())
                 .dob(request.dob())
                 .role(UserRole.USER)
