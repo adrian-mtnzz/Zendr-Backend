@@ -35,9 +35,18 @@ public class UserServiceImpl implements UserService {
         if (user.getEmail() == null) throw new IllegalArgumentException("El email no puede estar vacío");
         if (existsByEmail(user.getEmail())) throw new IllegalArgumentException("El email de usuario ya existe");
         
+        if (user.getDeportiveProfile() != null && user.getDeportiveProfile().getFavDisciplines() != null) {
+            boolean isFavDisciplinesValid = user.getDeportiveProfile().getFavDisciplines().stream().allMatch(
+                    discipline -> disciplineRepository.existsById(discipline.getDisciplineId())
+                    
+            );
+            if (!isFavDisciplinesValid) throw new IllegalArgumentException("Las disiciplinas no son válidas");
+        }
+        
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+        
         user.setRole(UserRole.USER);
         
         return repo.save(user);
@@ -242,7 +251,13 @@ public class UserServiceImpl implements UserService {
     public Optional<DeportiveProfile> updateDeportiveProfile(String id, DeportiveProfile profile) {
 
         Objects.requireNonNull(profile, "El perfil deportivo no puede ser nulo");
-
+        if (profile.getFavDisciplines() != null) {
+            boolean isFavDisciplinesValid = profile.getFavDisciplines().stream().allMatch(
+                    discipline -> disciplineRepository.existsById(discipline.getDisciplineId())
+            
+            );
+            if (!isFavDisciplinesValid) throw new IllegalArgumentException("Las disiciplinas no son válidas");
+        }
         return repo.findById(id).map(user -> {
 
             user.setDeportiveProfile(profile);
@@ -256,7 +271,12 @@ public class UserServiceImpl implements UserService {
     public Optional<DeportiveProfile> updateFavDisciplines(String id, List<FavDisciplines> favDisciplines) {
 
         Objects.requireNonNull(favDisciplines, "La lista de disciplinas favoritas no puede ser nula");
-
+        
+        boolean isFavDisciplinesValid = favDisciplines.stream().allMatch(
+                discipline -> disciplineRepository.existsById(discipline.getDisciplineId())
+        );
+        if (!isFavDisciplinesValid) throw new IllegalArgumentException("Las disiciplinas no son válidas");
+        
         return repo.findById(id).map(user -> {
 
             if (user.getDeportiveProfile() == null) {
