@@ -14,4 +14,8 @@ public enum UserRole {
 
     @JsonValue
     private final String description;
+    
+    public String getAuthority() {
+        return "ROLE_" + name();
+    }
 }

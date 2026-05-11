@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -73,6 +74,8 @@ public class AuthServiceImpl implements AuthService {
     
     
     public TokenResponse authenticate(final AuthRequest request) {
+        
+        System.out.println(repository.findByEmail(request.email()));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
@@ -121,8 +124,8 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType(Token.TokenType.BEARER)
                 .createdAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(jwtExpiration))
-                .isExpired(false)
-                .isRevoked(false)
+                .expired(false)
+                .revoked(false)
                 .deviceId(deviceId)
                 .build();
         
@@ -143,7 +146,8 @@ public class AuthServiceImpl implements AuthService {
     }
     
     public TokenResponse refreshToken(@NotNull final String authentication) {
-        if(authentication == null || !authentication.startsWith("Bearer ")) {
+        
+        if (authentication == null || !authentication.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Header de autenticación inválido");
         }
         
@@ -152,17 +156,21 @@ public class AuthServiceImpl implements AuthService {
         
         if (userEmail == null) return null;
         
-        final User user = repository.findByEmail(userEmail).orElseThrow(
-                () -> new UsernameNotFoundException("No se ha encontrado el usuario")
-        );
+        final User user = repository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("No se ha encontrado el usuario"));
         
         String deviceId = deviceService.findByUserId(user.getId()).getId();
         
-        final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user);
-        if (!isTokenValid) return null;
+        final boolean isTokenValid = jwtService.isTokenValid(refreshToken, user.getEmail());
+        if (!isTokenValid || tokenRepository.findByToken(refreshToken).isEmpty()) return null;
         
-        final String accessToken = jwtService.generateRefreshToken(user);
+        final boolean isStored = tokenRepository.findByToken(refreshToken)
+                .map(token -> !token.isExpired() && !token.isRevoked())
+                .orElse(false);
         
+        if (!isStored) return null;
+        
+        final String accessToken = jwtService.generateToken(user);
         revokeAllUserTokens(user.getId());
         
         return new TokenResponse(accessToken, refreshToken, user.getId(), deviceId);

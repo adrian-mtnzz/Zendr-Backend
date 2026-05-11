@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -53,14 +54,15 @@ public class JwtServiceImpl implements JwtService {
                 .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey())
+                .signWith(getSignInKey(), Jwts.SIG.HS256)
                 .compact();
     }
     
     
-    public boolean isTokenValid(String token, User user) {
+    public boolean isTokenValid(String token, String email) {
         final String username = extractUsername(token);
-        return (username.equals(user.getEmail())) && !isTokenExpired(token);
+        
+        return username != null && username.equals(email) && !isTokenExpired(token);
     }
     
     

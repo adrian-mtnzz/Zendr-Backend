@@ -18,7 +18,7 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public Device save(String userId, String platform, String deviceModel, String ipAddress) {
         
-        if (userRepository.findById(userId).isPresent()) throw new IllegalArgumentException("Usuario no encontrado");
+        if (userRepository.findById(userId).isEmpty()) throw new IllegalArgumentException("Usuario no encontrado");
         if (ipAddress.length() < 7) throw new IllegalArgumentException("La dirección ip no es válida");
         
         Device device = Device.builder()

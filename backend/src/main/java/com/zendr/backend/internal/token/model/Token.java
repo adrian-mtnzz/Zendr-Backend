@@ -20,7 +20,7 @@ public class Token {
     
     @Id
     @Setter(AccessLevel.NONE)
-    private Long id;
+    private String id;
     
     @NotBlank(message = "El ID de usuario no puede estar vacío")
     private String userId;
@@ -39,10 +39,10 @@ public class Token {
     private Instant expiresAt;
     
     @NotNull(message = "El estado de expiración es obligatorio")
-    private boolean isExpired;
+    private boolean expired;
     
     @NotNull(message = "El estado revocado es obligatorio")
-    private boolean isRevoked;
+    private boolean revoked;
     
     @NotNull(message = "El id del dispositivo es obligatorio")
     private String deviceId;

@@ -26,15 +26,16 @@ public class AppConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         
-        return username -> {
+        return email -> {
             
-            final User user = repository.findByEmail(username)
+            final User user = repository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("No se ha encontrado el usuario"));
             
             return org.springframework.security.core.userdetails.User
                     .builder()
                     .username(user.getEmail())
                     .password(user.getPassword())
+                    .authorities(user.getRole().getAuthority())
                     .build();
         };
     }
@@ -54,14 +55,5 @@ public class AppConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(AbstractHttpConfigurer::disable);
-
-        return http.build();
     }
 }
