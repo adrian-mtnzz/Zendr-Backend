@@ -160,9 +160,9 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
-
-
-@PatchMapping("/{id}")
+    
+    
+    @PatchMapping("/{id}")
     public ResponseEntity<UserDTO> updateUserDTO(@PathVariable String id, @RequestBody UserDTO dto) {
 
         return service.updateUserFromDTO(id, dto)

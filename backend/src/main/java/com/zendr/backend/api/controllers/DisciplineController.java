@@ -1,6 +1,7 @@
 package com.zendr.backend.api.controllers;
 
 import com.zendr.backend.internal.discipline.model.Discipline;
+import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import com.zendr.backend.services.discipline.DisciplineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/auth/disciplines")
@@ -44,4 +45,19 @@ public class DisciplineController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    
+    @GetMapping("levels")
+    public ResponseEntity<List<Map<String, String>>> getLevels() {
+        
+        List<Map<String, String>> response = new ArrayList<>();
+        
+        response = Arrays.stream(FavDisciplinesCurrentLevel.values())
+                .map(level -> Map.of(
+                        "value", level.name(),
+                        "name", level.getDescription()
+                ))
+                .toList();
+        
+        return ResponseEntity.ok(response);
+    }
 }
