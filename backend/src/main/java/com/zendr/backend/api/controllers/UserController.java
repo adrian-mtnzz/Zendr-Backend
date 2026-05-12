@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.function.EntityResponse;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -150,9 +151,18 @@ public class UserController {
 
         return ResponseEntity.ok(result);
     }
+    
+    @GetMapping("/qr-code")
+    public ResponseEntity<Map<String, String>> getQrCodeByUserId(@RequestBody String id) {
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("QRCode", service.getQRCode(id));
+
+        return ResponseEntity.ok(response);
+    }
 
 
-    @PatchMapping("/{id}")
+@PatchMapping("/{id}")
     public ResponseEntity<UserDTO> updateUserDTO(@PathVariable String id, @RequestBody UserDTO dto) {
 
         return service.updateUserFromDTO(id, dto)

@@ -124,10 +124,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<String> getQRCode(String id) {
+    public String getQRCode(String id) {
 
-        return repo.findById(id)
-                .map(User::getQRCode);
+        String QRCode = repo.findById(id)
+                .map(User::getQRCode)
+                .orElseThrow(
+                    () -> new IllegalArgumentException("No se ha encontrado el código QR de este usuario"));
+    
+        return QRCode;
     }
 
     @Override

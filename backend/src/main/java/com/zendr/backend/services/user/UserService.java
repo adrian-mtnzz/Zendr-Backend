@@ -23,7 +23,7 @@ public interface UserService {
     // Busquedas Parciales
     Optional<String> getEmail(String id);
     Optional<String> getRole(String id);
-    Optional<String> getQRCode(String id);
+    String getQRCode(String id);
     Optional<DeportiveProfile> getDeportiveProfile(String id);
     Optional<Penalties> getPenalties(String id);
     Optional<BillingDetails> getBillingDetails(String id);
