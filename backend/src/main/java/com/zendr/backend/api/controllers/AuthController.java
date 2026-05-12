@@ -56,4 +56,28 @@ public class AuthController {
     public TokenResponse refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authentication) {
         return service.refreshToken(authentication);
     }
+    
+    
+    @GetMapping("/validate")
+    public ResponseEntity<Map<String, Boolean>> validateUniqueParams(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email) {
+        
+        Map<String, Boolean> result = new HashMap<>();
+        
+        if (username != null && !username.isEmpty()) {
+            result.put("usernameExists", userService.existsByUsername(username));
+        }
+        
+        if (email != null && !email.isEmpty()) {
+            result.put("emailExists", userService.existsByEmail(email));
+        }
+        
+        if (result.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        return ResponseEntity.ok(result);
+    }
+    
 }
