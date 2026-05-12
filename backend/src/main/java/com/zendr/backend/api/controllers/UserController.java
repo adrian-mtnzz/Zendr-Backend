@@ -152,7 +152,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
     
-    @GetMapping("/qr-code")
+    @PostMapping("/qr-code")
     public ResponseEntity<Map<String, String>> getQrCodeByUserId(@RequestBody Map<String, String> body) {
         
         Map<String, String> response = new HashMap<>();
