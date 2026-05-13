@@ -15,25 +15,14 @@ public class EventCapacity {
     @Min(value = 0, message = "Las reservas actuales no pueden ser negativas")
     private int actualBookings;
     
-    @NotNull(message = "El estado del evento no puede ser nulo")
-    private EventStatus status;
+    @NotNull(message = "El estado de ocupación del evento no puede ser nulo")
+    private boolean isFull;
+    
     
     @Builder
-    public EventCapacity(int maxCapacity, int actualBookings, EventStatus status) {
+    public EventCapacity(int maxCapacity, int actualBookings, boolean isFull) {
         this.maxCapacity = maxCapacity;
         this.actualBookings = actualBookings;
-        this.status = EventStatus.ACTIVE;
-    }
-    
-    
-    @RequiredArgsConstructor
-    public enum EventStatus {
-        ACTIVE("Activo"),
-        ONGOING("En curso"),
-        ENDED("Finalizado"),
-        CANCELLED("Cancelado");
-        
-        @JsonValue
-        private final String description;
+        this.isFull = false;
     }
 }

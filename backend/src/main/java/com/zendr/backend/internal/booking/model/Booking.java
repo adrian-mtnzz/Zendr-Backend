@@ -28,10 +28,6 @@ public class Booking {
     @Builder.Default
     private BookingStatus status = BookingStatus.REGISTERED;
     
-    @Builder.Default
-    @NotNull(message="La asistencia no puede estar vacía")
-    private boolean attendance = false;
-    
     @Valid
     private BookingPaymentDetails payment;
     
@@ -40,7 +36,9 @@ public class Booking {
     public enum BookingStatus {
         REGISTERED("Registrado"),
         CANCELED("Cancelado"),
-        UNNASSISTED("Sin asistencia");
+        ASSISTED("Asistido"),
+        UNNASSISTED("Sin asistencia"),
+        CANCELED_BY_USER("Cancelado por usuario");// No mostrar en listas de eventos
         
         @JsonValue
         private final String description;
