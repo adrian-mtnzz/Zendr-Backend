@@ -31,6 +31,12 @@ application:
       refresh-token:
         expiration: 604800000 # 7 days
 
+  tomtom:
+    api-key: ${ZENDR_TOMTOM_API_KEY}
+
+  openweather:
+    api-key: ${ZENDR_OPENWEATHER_API_KEY}
+
   #jackson:
     #serialization:
       #writeDatesAsTimestamps: false

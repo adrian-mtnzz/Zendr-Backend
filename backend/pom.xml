@@ -118,6 +118,11 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Cliente WEB -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
 
 		<!-- JWT -->
 		<!-- Source: https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->

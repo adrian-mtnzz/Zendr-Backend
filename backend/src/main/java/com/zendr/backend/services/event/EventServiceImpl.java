@@ -10,7 +10,7 @@ import com.zendr.backend.internal.event.model.EventLocation;
 import com.zendr.backend.internal.event.repository.EventRepository;
 import com.zendr.backend.internal.user.model.FavDisciplines;
 import com.zendr.backend.internal.user.model.User;
-import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
+import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
 import com.zendr.backend.internal.waitList.model.WaitList;
 import com.zendr.backend.internal.waitList.repository.WaitListRepository;
@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.time.Duration;
@@ -46,15 +47,15 @@ public class EventServiceImpl implements EventService {
     private final WeatherService weatherService;
     
     
-    
+    @Transactional
     public EventResponse save(CreateEventRequest request) {
         
         // VALIDACIONES INICIALES
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-       
-        if (user.getRole().getDescription().equals("User")) {
-            throw new IllegalArgumentException("" +
+        
+        if (user.getRole().equals(UserRole.USER)) {
+            throw new IllegalArgumentException(
                     "La creación de eventos no está permitida para este tipo de usuario, debe ser Monitor o superior");
         }
         
@@ -62,25 +63,23 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
         
         
-        
-        
-        // OBTENER COORDENADAS  POR IMPLEMENTAR ********
+        // OBTENER COORDENADAS
         EventLocation location = EventLocation.builder()
                 .coordsType(GeoJsonObjectType.POINT)
-                .coords(geocodingService.getCoordinates())
+                .coords(geocodingService.getCoordinates(
+                        request.address(),
+                        request.city(),
+                        request.region(),
+                        request.country()))
                 .build();
         
-        
-        
-        // CREAR WEATHER  POR IMPLEMENTAR **********
-        Weather weather = weatherService.getWeatherForCoordinates(
+        // CREAR WEATHER
+        Weather weather = weatherService.getCurrentWeather(
                 location.getCoords().longitud(),
                 location.getCoords().latitud()
         );
         
         Weather savedWeather = weatherRepository.save(weather);
-        
-        
         
         // CREAR WAITLIST
         WaitList waitList = waitListRepository.save(new WaitList());
@@ -109,7 +108,6 @@ public class EventServiceImpl implements EventService {
                 .build();
         
         Event saved = repository.save(event);
-        
         
         
         // RESPONSE

@@ -23,6 +23,9 @@ public class Weather {
     private double temperatureInCelsius;
     
     @NotNull(message = "La condición meteorológica es obligatoria")
+    private String condition;
+    
+    @NotNull(message = "La descripción meteorológica es obligatoria")
     private String description;
     
     @NotNull(message = "El icono del clima es obligatorio")

@@ -21,24 +21,22 @@ public class EventLocation {
     
     public EventLocation(String coordsType, double[] coords) {
         
-        if (coords == null || coords.length != 3) {
+        if (coords == null || coords.length != 2) {
             throw new IllegalArgumentException(
-                    "Las coordenadas deben tener exactamente 3 elementos"
+                    "Las coordenadas deben tener exactamente 2 elementos"
             );
         }
         
         this.coordsType = GeoJsonObjectType.valueOf(coordsType);
         this.coords = new Coordinates(
                 coords[0],
-                coords[1],
-                coords[2]
+                coords[1]
         );
     }
     
     public record Coordinates(
             double longitud,
-            double latitud,
-            double altitude
+            double latitud
     ){
     }
 }

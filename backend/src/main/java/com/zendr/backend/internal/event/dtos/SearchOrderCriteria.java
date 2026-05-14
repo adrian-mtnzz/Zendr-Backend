@@ -16,9 +16,9 @@ public record SearchOrderCriteria(
     
     public SearchOrderCriteria {
         
-        if (coords != null && coords.length != 3) {
+        if (coords != null && coords.length != 2) {
             throw new IllegalArgumentException(
-                    "Las coordenadas deben tener exactamente 3 elementos"
+                    "Las coordenadas deben tener exactamente 2 elementos"
             );
         }
         coords = coords != null ? coords.clone() : null;
