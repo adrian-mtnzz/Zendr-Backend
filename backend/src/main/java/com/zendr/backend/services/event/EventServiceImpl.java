@@ -162,10 +162,16 @@ public class EventServiceImpl implements EventService {
     
     private Set<String> resolveDisciplineIds(User user, SearchFilters filters) {
         
-        // Filtro explícito del front
-        if (filters != null
-                && filters.disciplinesNames() != null
-                && !filters.disciplinesNames().isEmpty()) {
+        // Caso disciplina nula + algún filtro no nulo
+        if (filters != null && filters.disciplinesNames().isEmpty() && (
+                filters.price() != null || filters.day() != null || filters.search() != null || filters.levels() != null
+        )) {
+            // Sin filtros
+            return Set.of();
+        }
+        
+        // Disciplina no nula
+        else if (filters != null && !filters.disciplinesNames().isEmpty()) {
             
             return filters.disciplinesNames().stream()
                     .map(name -> disciplineRepository.findByName(name)
@@ -175,9 +181,8 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toSet());
         }
         
-        // Fallback usuario disciplina nula || Falta comprobar resto de campos no nulos
-        if (filters != null && filters.disciplinesNames() != null && user.getDeportiveProfile() != null
-                && user.getDeportiveProfile().getFavDisciplines() != null) {
+        // Fallback usuario disciplina nula + resto de filtros null
+        else if (filters != null && user.getDeportiveProfile() != null && user.getDeportiveProfile().getFavDisciplines() != null) {
             
             return user.getDeportiveProfile()
                     .getFavDisciplines()
