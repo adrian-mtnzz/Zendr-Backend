@@ -1,6 +1,5 @@
 package com.zendr.backend.api.controllers;
 
-import com.zendr.backend.internal.event.dtos.EventsResponse;
 import com.zendr.backend.internal.event.dtos.EventsSearchRequest;
 import com.zendr.backend.internal.event.dtos.SearchEventDTO;
 import com.zendr.backend.services.event.EventService;

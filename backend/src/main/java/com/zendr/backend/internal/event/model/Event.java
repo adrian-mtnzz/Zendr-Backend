@@ -1,5 +1,6 @@
 package com.zendr.backend.internal.event.model;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -36,7 +37,7 @@ public class Event {
     private String region;
     
     @NotBlank(message = "El país no puede estar vacío")
-    private String country;
+    private String countryCode;
     
     @NotBlank(message = "El código postal no puede estar vacío")
     private String zip;
@@ -79,9 +80,26 @@ public class Event {
     @Valid
     private EventCapacity capacity;
     
+    @NotNull
+    private EventStatus status;
+    
     @Setter(AccessLevel.NONE)
     private String search;
     
+    
+    @Getter
+    @RequiredArgsConstructor
+    public enum EventStatus {
+            
+            ACTIVE("Activo"),
+            ONGOING("En curso"),
+            ENDED("Finalizado"),
+            CANCELLED("Cancelado");
+        
+        @JsonValue
+        private final String description;
+    
+    }
     @Builder
     public Event(
             String id, String name, String placeCommonName, String address, String description,
@@ -105,6 +123,7 @@ public class Event {
         this.location = location;
         this.priceDetails = priceDetails;
         this.capacity = capacity;
+        this.status = EventStatus.ACTIVE;
         this.search = this.name+" "+this.placeCommonName+" "+this.address+" "+this.city+" "+this.region;
     }
 }

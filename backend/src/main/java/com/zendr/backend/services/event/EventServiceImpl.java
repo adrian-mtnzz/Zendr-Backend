@@ -37,7 +37,9 @@ public class EventServiceImpl implements EventService {
     
     
     
-    
+    public EventResponse save(CreateEventRequest request) {
+        return new EventResponse();
+    }
     
     
     
