@@ -8,8 +8,8 @@ public record SearchOrderCriteria(
         
         Boolean proximity,
         Boolean time,
-        BigDecimal price,
-        String level,
+        Boolean price,
+        Boolean level,
         double[] coords
 
 ) {
@@ -31,8 +31,9 @@ public record SearchOrderCriteria(
     public boolean isProximity() {
         return Boolean.TRUE.equals(proximity);
     }
-    
     public boolean isTime() {
         return Boolean.TRUE.equals(time);
     }
+    public boolean isPrice() { return Boolean.TRUE.equals(time); }
+    public boolean isLevel() {return Boolean.TRUE.equals(level); }
 }

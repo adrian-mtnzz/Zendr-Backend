@@ -3,17 +3,18 @@ package com.zendr.backend.services.event;
 
 import com.zendr.backend.internal.discipline.model.Discipline;
 import com.zendr.backend.internal.discipline.repository.DisciplineRepository;
-import com.zendr.backend.internal.event.dtos.EventsResponse;
-import com.zendr.backend.internal.event.dtos.EventsSearchRequest;
-import com.zendr.backend.internal.event.dtos.SearchFilters;
-import com.zendr.backend.internal.event.dtos.SearchOrderCriteria;
+import com.zendr.backend.internal.event.dtos.*;
 import com.zendr.backend.internal.event.model.Event;
 import com.zendr.backend.internal.event.repository.EventRepository;
 import com.zendr.backend.internal.user.model.FavDisciplines;
 import com.zendr.backend.internal.user.model.User;
-import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import com.zendr.backend.internal.user.repository.UserRepository;
+import com.zendr.backend.internal.weather.model.Weather;
+import com.zendr.backend.internal.weather.repository.WeatherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
@@ -23,7 +24,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.awt.geom.Point2D.distance;
 
 
 @Service
@@ -33,9 +33,18 @@ public class EventServiceImpl implements EventService {
     private final EventRepository repository;
     private final DisciplineRepository disciplineRepository;
     private final UserRepository userRepository;
+    private final WeatherRepository weatherRepository;
     
     
-    public EventsResponse filterAndOrderAllEvents(EventsSearchRequest request) {
+    
+    
+    
+    
+    
+    public Page<SearchEventDTO> filterAndOrderAllEvents(
+            EventsSearchRequest request,
+            Pageable pageable
+    ) {
         
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -46,9 +55,55 @@ public class EventServiceImpl implements EventService {
         
         events = applyOrdering(events, request.order());
         
-        return new EventsResponse(events);
+        List<SearchEventDTO> dtoList = events.stream()
+                .map(event -> {
+                    
+                    Weather weather = weatherRepository.findById(event.getId())
+                            .orElseThrow(() -> new RuntimeException("Weather not found"));
+                    
+                    Discipline discipline = disciplineRepository
+                            .findById(event.getDisciplineId())
+                            .orElseThrow(() -> new RuntimeException("Discipline not found"));
+                    
+                    return new SearchEventDTO(
+                            weather.getTemperatureInCelsius(),
+                            distance(
+                                    request.order().coords()[0],
+                                    request.order().coords()[1],
+                                    event.getLocation().getCoords().longitud(),
+                                    event.getLocation().getCoords().latitud()
+                            ),
+                            event.getName(),
+                            event.getPlaceCommonName(),
+                            discipline.getName(),
+                            event.getLevel().getDescription(),
+                            event.getStartsAt(),
+                            event.getPriceDetails().getPrice(),
+                            event.getPriceDetails().getCurrency().getSymbol()
+                    );
+                })
+                .toList();
+        
+        int start = (int) pageable.getOffset();
+        
+        if (start >= dtoList.size()) {
+            return new PageImpl<>(List.of(), pageable, dtoList.size());
+        }
+        
+        int end = Math.min(start + pageable.getPageSize(), dtoList.size());
+        
+        List<SearchEventDTO> pageContent = dtoList.subList(start, end);
+        
+        return new PageImpl<>(pageContent, pageable, dtoList.size());
     }
     
+    
+    
+    
+    
+    // =======================
+    //        FILTRADO
+    // =======================
     
     private List<Event> applyFilters(
             User user,
@@ -143,22 +198,28 @@ public class EventServiceImpl implements EventService {
     }
     
     
+    
+    
+    // ==============================
+    //          ORDENACION
+    // ==============================
+    
     private List<Event> applyOrdering(
             List<Event> events,
             SearchOrderCriteria order
     ) {
-        // TIEMPO
+        // FECHA
         if(order.isTime()) {
            return orderByClosestDate(events);
         }
         
         // PRECIO
-        if (order.price() != null) {
+        if (order.isPrice()) {
             return orderByPrice(events);
         }
         
         // NIVEL
-        if (order.level() != null) {
+        if (order.isLevel()) {
             return orderByLevel(events);
         }
         

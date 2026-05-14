@@ -19,6 +19,9 @@ public class Weather {
     @Setter(AccessLevel.NONE)
     private String id;
     
+    @NotNull(message = "Los grados celsius no pueden ser nulos")
+    private double temperatureInCelsius;
+    
     @NotNull(message = "La condición meteorológica es obligatoria")
     private String description;
     

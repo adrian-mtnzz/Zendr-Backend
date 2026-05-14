@@ -1,8 +1,10 @@
 package com.zendr.backend.services.event;
 
-import com.zendr.backend.internal.event.dtos.EventsResponse;
 import com.zendr.backend.internal.event.dtos.EventsSearchRequest;
+import com.zendr.backend.internal.event.dtos.SearchEventDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface EventService {
-    EventsResponse filterAndOrderAllEvents(EventsSearchRequest request);
+    Page<SearchEventDTO> filterAndOrderAllEvents(EventsSearchRequest request, Pageable pageable);
 }
