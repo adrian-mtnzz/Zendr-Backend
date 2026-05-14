@@ -205,8 +205,8 @@ public class EventServiceImpl implements EventService {
             return events;
         }
         
-        double lat = coords[0];
-        double lon = coords[1];
+        double lon = coords[0];
+        double lat = coords[1];
         
         return events.stream()
                 .sorted(Comparator.comparingDouble(
