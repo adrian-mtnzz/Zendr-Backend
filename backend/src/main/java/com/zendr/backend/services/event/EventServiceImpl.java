@@ -16,6 +16,7 @@ import com.zendr.backend.internal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -89,7 +90,7 @@ public class EventServiceImpl implements EventService {
                 
                 // CAMPO SEARCH
                 .filter(e -> filters.search() == null ||
-                        e.getName().toLowerCase().contains(filters.search().toLowerCase()))
+                        normalize(e.getSearch()).contains(normalize(filters.search())))
                 
                 // DISCIPLINAS  *** METER COMPROBACION PREVIA CASO SIN FILTROS ***
                 .filter(e -> disciplineIds.isEmpty() ||
@@ -132,6 +133,13 @@ public class EventServiceImpl implements EventService {
         
         // Sin filtros
         return Set.of();
+    }
+    
+    
+    private static String normalize(String text) {
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT);
     }
     
     
