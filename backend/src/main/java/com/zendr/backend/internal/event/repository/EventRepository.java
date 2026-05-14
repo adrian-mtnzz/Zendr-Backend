@@ -1,4 +1,12 @@
 package com.zendr.backend.internal.event.repository;
 
-public interface EventRepository {
+import com.zendr.backend.internal.event.model.Event;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface EventRepository extends MongoRepository<Event, String> {
+    
 }

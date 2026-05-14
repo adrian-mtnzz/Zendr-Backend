@@ -1,7 +1,7 @@
 package com.zendr.backend.internal.event.model;
 
+import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -10,9 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Locale;
 
 @Data
 @NoArgsConstructor
@@ -47,11 +44,14 @@ public class Event {
     @NotBlank(message = "La descripción del evento no puede estar vacía")
     private String description;
     
-    @NotBlank(message = "El ID de usuario no puede estar vacío")
+    @NotBlank(message = "El ID del monitor no puede estar vacío")
     private String monitorId;
     
     @NotBlank(message = "El ID de la disciplina no puede estar vacío")
     private String disciplineId;
+    
+    @NotNull(message = "El nivel de la disciplina no puede estar vacío")
+    private FavDisciplinesCurrentLevel level;
     
     @NotBlank(message = "El ID del clima no puede estar vacío")
     private String weatherId;
@@ -85,8 +85,8 @@ public class Event {
     @Builder
     public Event(
             String id, String name, String placeCommonName, String address, String description,
-            String monitorId, String disciplineId, String weatherId, String waitListId,
-            Instant startsAt, Duration duration, EventLocation location,
+            String monitorId, String disciplineId, String level, String weatherId,
+            String waitListId, Instant startsAt, Duration duration, EventLocation location,
             EventPriceDetails priceDetails, EventCapacity capacity, String search) {
        
         this.id = id;
@@ -96,6 +96,7 @@ public class Event {
         this.description = description;
         this.monitorId = monitorId;
         this.disciplineId = disciplineId;
+        this.level = FavDisciplinesCurrentLevel.valueOf(level);
         this.weatherId = weatherId;
         this.waitListId = waitListId;
         this.startsAt=  startsAt;

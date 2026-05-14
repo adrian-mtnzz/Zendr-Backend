@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface DisciplineRepository extends MongoRepository<Discipline, String> {
     boolean existsByNameIgnoreCase(String name);
+    Optional<Discipline> findByName(String name);
 }

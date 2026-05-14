@@ -8,18 +8,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class EventLocation {
     
     @NotNull(message = "El tipo de coordenadas no puede ser nulo")
-    public GeoJsonObjectType coordsType;
+    private GeoJsonObjectType coordsType;
     
     @NotNull(message = "Las coordenadas no pueden ser nulas")
-    public double[] coords;
+    private Coordinates coords;
     
-    @Builder
     public EventLocation(String coordsType, double[] coords) {
         
         if (coords == null || coords.length != 3) {
@@ -29,6 +28,17 @@ public class EventLocation {
         }
         
         this.coordsType = GeoJsonObjectType.valueOf(coordsType);
-        this.coords = coords.clone();
+        this.coords = new Coordinates(
+                coords[0],
+                coords[1],
+                coords[2]
+        );
+    }
+    
+    public record Coordinates(
+            double longitud,
+            double latitud,
+            double altitude
+    ){
     }
 }
