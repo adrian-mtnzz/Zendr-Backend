@@ -47,7 +47,7 @@ public class EventServiceImpl implements EventService {
     ) {
         
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         List<Event> events = repository.findAll();
         
@@ -58,12 +58,12 @@ public class EventServiceImpl implements EventService {
         List<SearchEventDTO> dtoList = events.stream()
                 .map(event -> {
                     
-                    Weather weather = weatherRepository.findById(event.getId())
-                            .orElseThrow(() -> new RuntimeException("Weather not found"));
+                    Weather weather = weatherRepository.findById(event.getWeatherId())
+                            .orElseThrow(() -> new RuntimeException("Condiciones meteorológicas no encontradas"));
                     
                     Discipline discipline = disciplineRepository
                             .findById(event.getDisciplineId())
-                            .orElseThrow(() -> new RuntimeException("Discipline not found"));
+                            .orElseThrow(() -> new RuntimeException("Disciplina no encontrada"));
                     
                     return new SearchEventDTO(
                             weather.getTemperatureInCelsius(),
