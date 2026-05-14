@@ -50,10 +50,7 @@ public class JwtServiceImpl implements JwtService {
     private String buildToken(final User user, final long expiration) {
         return Jwts
                 .builder()
-                .claims(Map.of(
-                        "name", user.getName(),
-                        "role", user.getRole().getAuthority()
-                ))
+                .claims(Map.of("name", user.getName()))
                 .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
