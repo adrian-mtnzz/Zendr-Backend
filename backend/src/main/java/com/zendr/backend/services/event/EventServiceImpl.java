@@ -260,7 +260,7 @@ public class EventServiceImpl implements EventService {
     private Set<String> resolveDisciplineIds(User user, SearchFilters filters) {
         
         // Caso disciplina nula + algún filtro no nulo
-        if (filters != null && filters.disciplinesNames().isEmpty() && (
+        if (filters != null && (filters.disciplinesNames() == null || filters.disciplinesNames().isEmpty()) && (
                 filters.price() != null || filters.day() != null || filters.search() != null || filters.levels() != null
         )) {
             // Sin filtros
@@ -268,7 +268,7 @@ public class EventServiceImpl implements EventService {
         }
         
         // Disciplina no nula
-        else if (filters != null && !filters.disciplinesNames().isEmpty()) {
+        else if (filters != null && filters.disciplinesNames() != null  && !filters.disciplinesNames().isEmpty()) {
             
             return filters.disciplinesNames().stream()
                     .map(name -> disciplineRepository.findByName(name)
