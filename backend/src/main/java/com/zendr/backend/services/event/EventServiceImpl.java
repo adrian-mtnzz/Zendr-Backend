@@ -208,50 +208,65 @@ public class EventServiceImpl implements EventService {
             SearchFilters filters
     ) {
         
+        // SIN FILTROS
         if (filters == null) {
-            return events;
+            return events.stream()
+                    .filter(e -> e.getStartsAt().isAfter(Instant.now()))
+                    .toList();
         }
         
-        // Niveles de usuario
-        Set<String> userLevels = user.getDeportiveProfile()
-                .getFavDisciplines()
-                .stream()
-                .map(fd -> fd.getCurrentLevel().getDescription())
-                .collect(Collectors.toSet());
-        
-        // Disciplinas
+        // DISCIPLINAS
         Set<String> disciplineIds = resolveDisciplineIds(user, filters);
         
         return events.stream()
                 
-                // PRECIO
-                .filter(e -> filters.price() == null ||
-                        e.getPriceDetails().getPrice().compareTo(filters.price()) == 0)
-                
                 // EVENTOS ACTIVOS
                 .filter(e -> e.getStartsAt().isAfter(Instant.now()))
                 
-                // FECHA (DÍA)
-                .filter(e -> filters.day() == null ||
-                        e.getStartsAt()
+                // PRECIO
+                .filter(e ->
+                        filters.price() == null
+                                || e.getPriceDetails()
+                                .getPrice()
+                                .compareTo(filters.price()) == 0
+                )
+                
+                // FECHA
+                .filter(e ->
+                        filters.day() == null
+                                || e.getStartsAt()
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
-                                .isEqual(filters.day()
-                                        .atZone(ZoneId.systemDefault())
-                                        .toLocalDate()))
+                                .isEqual(
+                                        filters.day()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toLocalDate()
+                                )
+                )
                 
-                // CAMPO SEARCH
-                .filter(e -> filters.search() == null ||
-                        normalize(e.getSearch()).contains(normalize(filters.search())))
+                // SEARCH
+                .filter(e ->
+                        filters.search() == null
+                                || normalize(e.getSearch())
+                                .contains(normalize(filters.search()))
+                )
                 
-                // DISCIPLINAS  *** METER COMPROBACION PREVIA CASO SIN FILTROS ***
-                .filter(e -> disciplineIds.isEmpty() ||
-                        disciplineIds.contains(e.getDisciplineId()))
+                // DISCIPLINAS
+                .filter(e ->
+                        disciplineIds == null
+                                || disciplineIds.isEmpty()
+                                || disciplineIds.contains(e.getDisciplineId())
+                )
                 
-                // NIVELES
-                .filter(e -> filters.levels() == null || filters.levels().isEmpty()
-                        ? userLevels.contains(e.getLevel().getDescription())
-                        : filters.levels().contains(e.getLevel().getDescription()))
+                .filter(e -> {
+                    
+                    // Si el usuario ha enviado filtros explícitos
+                    if (filters.levels() != null && !filters.levels().isEmpty()) {
+                        return filters.levels()
+                                .contains(e.getLevel().getDescription());
+                    }
+                    return true;
+                })
                 
                 .toList();
     }
