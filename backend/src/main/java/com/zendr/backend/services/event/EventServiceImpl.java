@@ -36,11 +36,11 @@ public class EventServiceImpl implements EventService {
     private final WeatherRepository weatherRepository;
     
     
-    
+    /*
     public EventResponse save(CreateEventRequest request) {
         return new EventResponse();
     }
-    
+    */
     
     
     public Page<SearchEventDTO> filterAndOrderAllEvents(
