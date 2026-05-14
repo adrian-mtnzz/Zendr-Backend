@@ -146,11 +146,13 @@ public class EventServiceImpl implements EventService {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
+        double[] coords = request.coords();
+        
         List<Event> events = repository.findAll();
         
         events = applyFilters(user, events, request.filters());
         
-        events = applyOrdering(events, request.order());
+        events = applyOrdering(events, request.order(), coords);
         
         List<SearchEventDTO> dtoList = events.stream()
                 .map(event -> {
@@ -165,8 +167,8 @@ public class EventServiceImpl implements EventService {
                     return new SearchEventDTO(
                             weather.getTemperatureInCelsius(),
                             distance(
-                                    request.order().coords()[0],
-                                    request.order().coords()[1],
+                                    coords[0],
+                                    coords[1],
                                     event.getLocation().getCoords().longitud(),
                                     event.getLocation().getCoords().latitud()
                             ),
@@ -323,8 +325,13 @@ public class EventServiceImpl implements EventService {
     
     private List<Event> applyOrdering(
             List<Event> events,
-            SearchOrderCriteria order
+            SearchOrderCriteria order,
+            double[] coords
     ) {
+        if (order == null) {
+            return orderByProximity(events, coords);
+        }
+        
         // FECHA
         if(order.isTime()) {
            return orderByClosestDate(events);
@@ -341,7 +348,7 @@ public class EventServiceImpl implements EventService {
         }
         
         // PROXIMIDAD POR DEFECTO
-        return orderByProximity(events, order.coords());
+        return orderByProximity(events, coords);
     }
     
     

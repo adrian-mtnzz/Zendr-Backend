@@ -9,23 +9,12 @@ public record SearchOrderCriteria(
         Boolean proximity,
         Boolean time,
         Boolean price,
-        Boolean level,
-        double[] coords
+        Boolean level
 
 ) {
     
-    public SearchOrderCriteria {
-        
-        if (coords != null && coords.length != 2) {
-            throw new IllegalArgumentException(
-                    "Las coordenadas deben tener exactamente 2 elementos"
-            );
-        }
-        coords = coords != null ? coords.clone() : null;
-    }
-    
     public static SearchOrderCriteria defaultOrder() {
-        return new SearchOrderCriteria(true, false, null, null, null);
+        return new SearchOrderCriteria(true, false, false, false);
     }
     
     public boolean isProximity() {

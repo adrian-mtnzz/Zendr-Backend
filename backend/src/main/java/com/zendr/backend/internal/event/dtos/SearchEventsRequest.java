@@ -7,7 +7,7 @@ public record SearchEventsRequest(
         
         @NotBlank(message = "El ID de usuario no puede estar vacío")
         String userId,
-        
+        double[] coords,
         @Valid
         SearchFilters filters,
         
@@ -17,6 +17,13 @@ public record SearchEventsRequest(
 ) {
     
     public SearchEventsRequest {
+        
+        if (coords != null && coords.length != 2) {
+            throw new IllegalArgumentException(
+                    "Las coordenadas deben tener exactamente 2 elementos y no puedes ser nulas"
+            );
+        }
+        coords = coords != null ? coords.clone() : null;
         
         if (filters == null) {
             filters = SearchFilters.defaultOrder();
