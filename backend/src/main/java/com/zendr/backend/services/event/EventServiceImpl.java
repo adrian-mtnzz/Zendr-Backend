@@ -120,8 +120,8 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toSet());
         }
         
-        // Fallback usuario
-        if (user.getDeportiveProfile() != null
+        // Fallback usuario disciplina nula || Falta comprobar resto de campos no nulos
+        if (filters != null && filters.disciplinesNames() != null && user.getDeportiveProfile() != null
                 && user.getDeportiveProfile().getFavDisciplines() != null) {
             
             return user.getDeportiveProfile()
