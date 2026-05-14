@@ -3,6 +3,7 @@ package com.zendr.backend.internal.event.dtos;
 import com.zendr.backend.internal.event.model.EventCapacity;
 import com.zendr.backend.internal.event.model.EventLocation;
 import com.zendr.backend.internal.event.model.EventPriceDetails;
+import com.zendr.backend.internal.weather.model.Weather;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -22,11 +23,11 @@ public record EventResponse(
         String monitorId,
         String disciplineId,
         String level,
-        String weatherId,
         String waitListId,
         Instant startsAt,
         Duration duration,
         Instant endsAt,
+        Weather weather,
         EventLocation location,
         EventPriceDetails priceDetails,
         EventCapacity capacity,

@@ -3,7 +3,7 @@ package com.zendr.backend.internal.event.dtos;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
-public record EventsSearchRequest(
+public record SearchEventsRequest(
         
         @NotBlank(message = "El ID de usuario no puede estar vacío")
         String userId,
@@ -16,7 +16,7 @@ public record EventsSearchRequest(
 
 ) {
     
-    public EventsSearchRequest {
+    public SearchEventsRequest {
         
         if (filters == null) {
             filters = SearchFilters.defaultOrder();

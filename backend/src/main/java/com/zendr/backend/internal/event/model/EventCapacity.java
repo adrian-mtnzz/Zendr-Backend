@@ -20,9 +20,9 @@ public class EventCapacity {
     
     
     @Builder
-    public EventCapacity(int maxCapacity, int actualBookings, boolean isFull) {
+    public EventCapacity(int maxCapacity) {
         this.maxCapacity = maxCapacity;
-        this.actualBookings = actualBookings;
+        this.actualBookings = 0;
         this.isFull = false;
     }
 }

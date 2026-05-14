@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -102,15 +103,19 @@ public class Event {
     }
     @Builder
     public Event(
-            String id, String name, String placeCommonName, String address, String description,
-            String monitorId, String disciplineId, String level, String weatherId,
-            String waitListId, Instant startsAt, Duration duration, EventLocation location,
-            EventPriceDetails priceDetails, EventCapacity capacity, String search) {
+            String id, String name, String placeCommonName, String address, String city, String region,
+            String countryCode, String zip, String description, String monitorId, String disciplineId,
+            String level, String weatherId, String waitListId, Instant startsAt, Duration duration,
+            EventLocation location, EventPriceDetails priceDetails, EventCapacity capacity, String search) {
        
         this.id = id;
         this.name = name;
         this.placeCommonName = placeCommonName;
         this.address = address;
+        this.city = city;
+        this.region = region;
+        this.countryCode = countryCode;
+        this.zip = zip;
         this.description = description;
         this.monitorId = monitorId;
         this.disciplineId = disciplineId;
@@ -124,7 +129,20 @@ public class Event {
         this.priceDetails = priceDetails;
         this.capacity = capacity;
         this.status = EventStatus.ACTIVE;
-        this.search = this.name+" "+this.placeCommonName+" "+this.address+" "+this.city+" "+this.region;
+        this.search = buildSearchField();
+    
+    }
+    
+    private String buildSearchField() {
+        
+        return String.join(" ",
+                Objects.toString(name, ""),
+                Objects.toString(placeCommonName, ""),
+                Objects.toString(address, ""),
+                Objects.toString(city, ""),
+                Objects.toString(region, ""),
+                Objects.toString(countryCode, "")
+        ).trim();
     }
 }
 

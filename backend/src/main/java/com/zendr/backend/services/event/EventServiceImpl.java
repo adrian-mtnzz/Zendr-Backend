@@ -1,16 +1,23 @@
 package com.zendr.backend.services.event;
 
 
+import com.mongodb.client.model.geojson.GeoJsonObjectType;
 import com.zendr.backend.internal.discipline.model.Discipline;
 import com.zendr.backend.internal.discipline.repository.DisciplineRepository;
 import com.zendr.backend.internal.event.dtos.*;
 import com.zendr.backend.internal.event.model.Event;
+import com.zendr.backend.internal.event.model.EventLocation;
 import com.zendr.backend.internal.event.repository.EventRepository;
 import com.zendr.backend.internal.user.model.FavDisciplines;
 import com.zendr.backend.internal.user.model.User;
+import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import com.zendr.backend.internal.user.repository.UserRepository;
+import com.zendr.backend.internal.waitList.model.WaitList;
+import com.zendr.backend.internal.waitList.repository.WaitListRepository;
 import com.zendr.backend.internal.weather.model.Weather;
 import com.zendr.backend.internal.weather.repository.WeatherRepository;
+import com.zendr.backend.services.geocoding.GeocodingService;
+import com.zendr.backend.services.weather.WeatherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,17 +41,107 @@ public class EventServiceImpl implements EventService {
     private final DisciplineRepository disciplineRepository;
     private final UserRepository userRepository;
     private final WeatherRepository weatherRepository;
+    private final WaitListRepository waitListRepository;
+    private final GeocodingService geocodingService;
+    private final WeatherService weatherService;
     
     
-    /*
+    
     public EventResponse save(CreateEventRequest request) {
-        return new EventResponse();
+        
+        // VALIDACIONES INICIALES
+        User user = userRepository.findById(request.userId())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+       
+        if (user.getRole().getDescription().equals("User")) {
+            throw new IllegalArgumentException("" +
+                    "La creación de eventos no está permitida para este tipo de usuario, debe ser Monitor o superior");
+        }
+        
+        Discipline discipline = disciplineRepository.findById(request.disciplineId())
+                .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
+        
+        
+        
+        
+        // OBTENER COORDENADAS  POR IMPLEMENTAR ********
+        EventLocation location = EventLocation.builder()
+                .coordsType(GeoJsonObjectType.POINT)
+                .coords(geocodingService.getCoordinates())
+                .build();
+        
+        
+        
+        // CREAR WEATHER  POR IMPLEMENTAR **********
+        Weather weather = weatherService.getWeatherForCoordinates(
+                location.getCoords().longitud(),
+                location.getCoords().latitud()
+        );
+        
+        Weather savedWeather = weatherRepository.save(weather);
+        
+        
+        
+        // CREAR WAITLIST
+        WaitList waitList = waitListRepository.save(new WaitList());
+        
+        
+        // CREAR EVENTO
+        Event event = Event.builder()
+                .name(request.name())
+                .placeCommonName(request.placeCommonName())
+                .address(request.address())
+                .city(request.city())
+                .region(request.region())
+                .countryCode(request.country())
+                .zip(request.zip())
+                .description(request.description())
+                .monitorId(user.getId())
+                .disciplineId(discipline.getId())
+                .level(request.level())
+                .weatherId(savedWeather.getId())
+                .waitListId(waitList.getId())
+                .startsAt(request.startsAt())
+                .duration(request.duration())
+                .location(location)
+                .priceDetails(request.priceDetails())
+                .capacity(request.capacity())
+                .build();
+        
+        Event saved = repository.save(event);
+        
+        
+        
+        // RESPONSE
+        return new EventResponse(
+                saved.getId(),
+                saved.getName(),
+                saved.getPlaceCommonName(),
+                saved.getAddress(),
+                saved.getCity(),
+                saved.getRegion(),
+                saved.getCountryCode(),
+                saved.getZip(),
+                saved.getDescription(),
+                saved.getMonitorId(),
+                saved.getDisciplineId(),
+                saved.getLevel().name(),
+                saved.getWaitListId(),
+                saved.getStartsAt(),
+                saved.getDuration(),
+                saved.getEndsAt(),
+                savedWeather,
+                saved.getLocation(),
+                saved.getPriceDetails(),
+                saved.getCapacity(),
+                Event.EventStatus.ACTIVE.getDescription()
+        );
     }
-    */
+    
     
     
     public Page<SearchEventDTO> filterAndOrderAllEvents(
-            EventsSearchRequest request,
+            SearchEventsRequest request,
             Pageable pageable
     ) {
         
@@ -61,11 +158,11 @@ public class EventServiceImpl implements EventService {
                 .map(event -> {
                     
                     Weather weather = weatherRepository.findById(event.getWeatherId())
-                            .orElseThrow(() -> new RuntimeException("Condiciones meteorológicas no encontradas"));
+                            .orElseThrow(() -> new IllegalArgumentException("Condiciones meteorológicas no encontradas"));
                     
                     Discipline discipline = disciplineRepository
                             .findById(event.getDisciplineId())
-                            .orElseThrow(() -> new RuntimeException("Disciplina no encontrada"));
+                            .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
                     
                     return new SearchEventDTO(
                             weather.getTemperatureInCelsius(),

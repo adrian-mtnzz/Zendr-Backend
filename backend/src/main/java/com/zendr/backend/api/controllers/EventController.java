@@ -1,6 +1,8 @@
 package com.zendr.backend.api.controllers;
 
-import com.zendr.backend.internal.event.dtos.EventsSearchRequest;
+import com.zendr.backend.internal.event.dtos.CreateEventRequest;
+import com.zendr.backend.internal.event.dtos.EventResponse;
+import com.zendr.backend.internal.event.dtos.SearchEventsRequest;
 import com.zendr.backend.internal.event.dtos.SearchEventDTO;
 import com.zendr.backend.services.event.EventService;
 import jakarta.validation.Valid;
@@ -18,9 +20,17 @@ public class EventController {
     
     private final EventService service;
     
+    
+    @PostMapping()
+    public ResponseEntity<EventResponse> createEvent(@Valid @RequestBody CreateEventRequest request) {
+        return ResponseEntity.ok(
+                service.save(request)
+        );
+    }
+    
     @PostMapping("/search")
     public ResponseEntity<Page<SearchEventDTO>> searchOrders(
-            @Valid @RequestBody EventsSearchRequest request,
+            @Valid @RequestBody SearchEventsRequest request,
             Pageable pageable
     ) {
         return ResponseEntity.ok(
