@@ -16,16 +16,16 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class S3Config {
     
-    @Value("${storage.endpoint}")
+    @Value("${application.storage.endpoint}")
     private final String endpoint;
     
-    @Value("${storage.region}")
+    @Value("${application.storage.region}")
     private final String region;
     
-    @Value("${storage.access-key}")
+    @Value("${application.storage.access-key}")
     private final String accessKey;
     
-    @Value("${storage.secret-key}")
+    @Value("${application.storage.secret-key}")
     private final String secretKey;
     
     @Bean
