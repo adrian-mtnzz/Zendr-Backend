@@ -147,23 +147,10 @@ public class EventServiceImpl implements EventService {
         double[] coords = request.coords();
         
         List<Event> events = repository.findAll();
-        events.forEach(e -> {
-            System.out.println("===============");
-            System.out.println("EVENT: " + e.getName());
-            System.out.println("STARTS AT: " + e.getStartsAt());
-            System.out.println("NOW: " + Instant.now());
-            System.out.println("IS AFTER: " + e.getStartsAt().isAfter(Instant.now()));
-        });
+        
         events = applyFilters(user, events, request.filters());
-        events.forEach(e -> {
-            System.out.println("===============");
-            System.out.println("EVENT: " + e.getName());
-            System.out.println("STARTS AT: " + e.getStartsAt());
-            System.out.println("NOW: " + Instant.now());
-            System.out.println("IS AFTER: " + e.getStartsAt().isAfter(Instant.now()));
-        });
         events = applyOrdering(events, request.order(), coords);
-        System.out.println("EVENTS BEFORE FILTER: " + events.size());
+        
         List<SearchEventDTO> dtoList = events.stream()
                 .map(event -> {
                     
@@ -179,8 +166,8 @@ public class EventServiceImpl implements EventService {
                             distance(
                                     coords[0],
                                     coords[1],
-                                    event.getLocation().getCoords().longitud(),
-                                    event.getLocation().getCoords().latitud()
+                                    event.getLocation().getCoords().latitud(),
+                                    event.getLocation().getCoords().longitud()
                             ),
                             event.getName(),
                             event.getPlaceCommonName(),
@@ -192,7 +179,7 @@ public class EventServiceImpl implements EventService {
                     );
                 })
                 .toList();
-        System.out.println("EVENTS BEFORE FILTER: " + events.size());
+        
         int start = (int) pageable.getOffset();
         
         if (start >= dtoList.size()) {
