@@ -76,6 +76,7 @@ public class GeocodingServiceImpl implements GeocodingService {
                         .queryParam("limit", 10)
                         .queryParam("view", "Unified")
                         .queryParam("key", apiKey)
+                        .queryParam("countrySet", "ES")
                         .build(search)
                 )
                 .retrieve()
