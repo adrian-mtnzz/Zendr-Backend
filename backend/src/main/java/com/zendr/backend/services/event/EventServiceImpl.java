@@ -406,7 +406,7 @@ public class EventServiceImpl implements EventService {
             double lat1, double lon1,
             double lat2, double lon2
     ) {
-        double R = 6371; // km
+        double R = 6371000; // km
         
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
