@@ -140,7 +140,7 @@ public class EventServiceImpl implements EventService {
                     Event.EventStatus.ACTIVE.getDescription()
             );
         } catch (IOException e) {
-            throw new RuntimeException("Error al subir la imagen del envento");
+            throw new RuntimeException("Error al subir la imagen del evento");
         }
     }
     

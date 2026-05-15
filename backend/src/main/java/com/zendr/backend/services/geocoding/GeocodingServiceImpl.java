@@ -70,7 +70,7 @@ public class GeocodingServiceImpl implements GeocodingService {
         
         Map<String, Object> response = tomTomWebClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/search/2/geocode/{query}.json")
+                        .path("/search/2/search/{query}.json")
                         .queryParam("storeResult", false)
                         .queryParam("typeahead", true)
                         .queryParam("limit", 10)
