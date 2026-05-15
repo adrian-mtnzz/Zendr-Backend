@@ -70,7 +70,7 @@ public class GeocodingServiceImpl implements GeocodingService {
     }
     
     public Page<Map<String, Object>> getLocationsBySearch(String search, Pageable pageable) {
-        
+        System.out.println(searchKey);
         Map<String, Object> response = tomTomWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/search/2/search/{query}.json")
@@ -80,8 +80,8 @@ public class GeocodingServiceImpl implements GeocodingService {
                         .queryParam("maxFuzzyLevel", 2)
                         .queryParam("view", "Unified")
                         .queryParam("relatedPois", "off")
-                        .queryParam("key", searchKey)
                         .queryParam("countrySet", "ES")
+                        .queryParam("key", searchKey)
                         .build(search)
                 )
                 .retrieve()
