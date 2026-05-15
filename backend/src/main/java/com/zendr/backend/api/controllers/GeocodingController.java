@@ -21,8 +21,11 @@ public class GeocodingController {
     private final GeocodingService service;
     
     @PostMapping
-    public ResponseEntity<Page<Map<String, Object>>> getSearchLocations(@RequestBody String search, Pageable page) {
+    public ResponseEntity<Page<Map<String, Object>>> getSearchLocations(@RequestBody Map<String, String> body, Pageable page) {
         
-        return ResponseEntity.ok(service.getLocationsBySearch(search, page));
+        if (body.get("search") != null) {
+            return ResponseEntity.ok(service.getLocationsBySearch(body.get("search"), page));
+        }
+        else return ResponseEntity.notFound().build();
     }
 }
