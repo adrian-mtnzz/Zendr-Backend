@@ -11,7 +11,7 @@ public record SearchFilters(
         BigDecimal price,
         List<String> disciplinesNames,
         List<String> levels,
-        Instant day,
+        Instant isBefore,
         String search
 
 ) {

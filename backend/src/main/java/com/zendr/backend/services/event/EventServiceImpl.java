@@ -26,9 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,11 +147,23 @@ public class EventServiceImpl implements EventService {
         double[] coords = request.coords();
         
         List<Event> events = repository.findAll();
-        
+        events.forEach(e -> {
+            System.out.println("===============");
+            System.out.println("EVENT: " + e.getName());
+            System.out.println("STARTS AT: " + e.getStartsAt());
+            System.out.println("NOW: " + Instant.now());
+            System.out.println("IS AFTER: " + e.getStartsAt().isAfter(Instant.now()));
+        });
         events = applyFilters(user, events, request.filters());
-        
+        events.forEach(e -> {
+            System.out.println("===============");
+            System.out.println("EVENT: " + e.getName());
+            System.out.println("STARTS AT: " + e.getStartsAt());
+            System.out.println("NOW: " + Instant.now());
+            System.out.println("IS AFTER: " + e.getStartsAt().isAfter(Instant.now()));
+        });
         events = applyOrdering(events, request.order(), coords);
-        
+        System.out.println("EVENTS BEFORE FILTER: " + events.size());
         List<SearchEventDTO> dtoList = events.stream()
                 .map(event -> {
                     
@@ -182,7 +192,7 @@ public class EventServiceImpl implements EventService {
                     );
                 })
                 .toList();
-        
+        System.out.println("EVENTS BEFORE FILTER: " + events.size());
         int start = (int) pageable.getOffset();
         
         if (start >= dtoList.size()) {
@@ -210,14 +220,6 @@ public class EventServiceImpl implements EventService {
             SearchFilters filters
     ) {
         
-        // SIN FILTROS
-        if (filters == null) {
-            return events.stream()
-                    .filter(e -> e.getStartsAt().isAfter(Instant.now()))
-                    .toList();
-        }
-        
-        // DISCIPLINAS
         Set<String> disciplineIds = resolveDisciplineIds(user, filters);
         
         return events.stream()
@@ -225,49 +227,52 @@ public class EventServiceImpl implements EventService {
                 // EVENTOS ACTIVOS
                 .filter(e -> e.getStartsAt().isAfter(Instant.now()))
                 
-                // PRECIO
+                // PRECIO (<=)
                 .filter(e ->
-                        filters.price() == null
-                                || e.getPriceDetails()
-                                .getPrice()
-                                .compareTo(filters.price()) == 0
+                        filters == null ||
+                                filters.price() == null ||
+                                e.getPriceDetails().getPrice().compareTo(filters.price()) <= 0
                 )
                 
                 // FECHA
-                .filter(e ->
-                        filters.day() == null
-                                || e.getStartsAt()
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                                .isEqual(
-                                        filters.day()
-                                                .atZone(ZoneId.systemDefault())
-                                                .toLocalDate()
-                                )
-                )
+                .filter(e -> {
+                    if (filters.isBefore() == null) return true;
+                    
+                    return e.getStartsAt().isBefore(filters.isBefore());
+                })
                 
-                // SEARCH
-                .filter(e ->
-                        filters.search() == null
-                                || normalize(e.getSearch())
-                                .contains(normalize(filters.search()))
-                )
+                // SEARCH flexible
+                .filter(e -> {
+                    if (filters == null || filters.search() == null || filters.search().isBlank()) {
+                        return true;
+                    }
+                    
+                    if (e.getSearch() == null) {
+                        return false;
+                    }
+                    
+                    String eventText = normalize(e.getSearch());
+                    String searchText = normalize(filters.search());
+                    
+                    return Arrays.stream(searchText.split("\\s+"))
+                            .allMatch(eventText::contains);
+                })
                 
                 // DISCIPLINAS
                 .filter(e ->
-                        disciplineIds == null
-                                || disciplineIds.isEmpty()
-                                || disciplineIds.contains(e.getDisciplineId())
+                        disciplineIds.isEmpty() ||
+                                disciplineIds.contains(e.getDisciplineId())
                 )
                 
+                // LEVELS
                 .filter(e -> {
-                    
-                    // Si el usuario ha enviado filtros explícitos
-                    if (filters.levels() != null && !filters.levels().isEmpty()) {
-                        return filters.levels()
-                                .contains(e.getLevel().getDescription());
+                    if (filters == null ||
+                            filters.levels() == null ||
+                            filters.levels().isEmpty()) {
+                        return true;
                     }
-                    return true;
+                    
+                    return filters.levels().contains(e.getLevel().name());
                 })
                 
                 .toList();
@@ -276,17 +281,11 @@ public class EventServiceImpl implements EventService {
     
     private Set<String> resolveDisciplineIds(User user, SearchFilters filters) {
         
-        // Caso disciplina nula + algún filtro no nulo
-        if (filters != null && (filters.disciplinesNames() == null || filters.disciplinesNames().isEmpty()) && (
-                filters.price() != null || filters.day() != null || filters.search() != null || filters.levels() != null
-        )) {
-            // Sin filtros
+        if (filters == null) {
             return Set.of();
         }
         
-        // Disciplina no nula
-        else if (filters != null && filters.disciplinesNames() != null  && !filters.disciplinesNames().isEmpty()) {
-            
+        if (filters.disciplinesNames() != null && !filters.disciplinesNames().isEmpty()) {
             return filters.disciplinesNames().stream()
                     .map(name -> disciplineRepository.findByName(name)
                             .map(Discipline::getId)
@@ -295,19 +294,21 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toSet());
         }
         
-        // Fallback usuario disciplina nula + resto de filtros null
-        else if (filters != null && user.getDeportiveProfile() != null && user.getDeportiveProfile().getFavDisciplines() != null) {
+        if (user.getDeportiveProfile() != null &&
+                user.getDeportiveProfile().getFavDisciplines() != null) {
             
             return user.getDeportiveProfile()
                     .getFavDisciplines()
                     .stream()
                     .map(FavDisciplines::getDisciplineId)
+                    .filter(disciplineRepository::existsById)
                     .collect(Collectors.toSet());
         }
         
-        // Sin filtros
         return Set.of();
     }
+    
+    
     
     
     private static String normalize(String text) {
