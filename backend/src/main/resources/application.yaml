@@ -33,6 +33,7 @@ application:
 
   tomtom:
     api-key: ${ZENDR_TOMTOM_API_KEY}
+    search-key: ${ZENDR_TOMTOM_SEARCH_KEY}
 
   openweather:
     api-key: ${ZENDR_OPENWEATHER_API_KEY}
