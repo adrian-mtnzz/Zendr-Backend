@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.text.Normalizer;
 import java.time.*;
 import java.util.*;
@@ -49,94 +50,98 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventResponse save(CreateEventRequest request) {
         
-        // VALIDACIONES INICIALES
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-        
-        if (user.getRole().equals(UserRole.USER)) {
-            throw new IllegalArgumentException(
-                    "La creación de eventos no está permitida para este tipo de usuario, debe ser Monitor o superior");
+        try {
+            // VALIDACIONES INICIALES
+            User user = userRepository.findById(request.userId())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            
+            if (user.getRole().equals(UserRole.USER)) {
+                throw new IllegalArgumentException(
+                        "La creación de eventos no está permitida para este tipo de usuario, debe ser Monitor o superior");
+            }
+            
+            Discipline discipline = disciplineRepository.findById(request.disciplineId())
+                    .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
+            
+            
+            // OBTENER COORDENADAS
+            EventLocation location = EventLocation.builder()
+                    .coordsType(GeoJsonObjectType.POINT)
+                    .coords(geocodingService.getCoordinates(
+                            request.address(),
+                            request.city(),
+                            request.region(),
+                            request.country()))
+                    .build();
+            
+            // CREAR WEATHER
+            Weather weather = weatherService.getCurrentWeather(
+                    location.getCoords().longitud(),
+                    location.getCoords().latitud()
+            );
+            
+            Weather savedWeather = weatherRepository.save(weather);
+            
+            // CREAR WAITLIST
+            WaitList waitList = waitListRepository.save(new WaitList());
+            
+            // SUBIR IMAGEN
+            String eventImgUrl = bucketService.uploadFile(request.eventImgUrl(), "events");
+            
+            // CREAR EVENTO
+            Event event = Event.builder()
+                    .name(request.name())
+                    .eventImgUrl(eventImgUrl)
+                    .placeCommonName(request.placeCommonName())
+                    .address(request.address())
+                    .city(request.city())
+                    .region(request.region())
+                    .countryCode(request.country())
+                    .zip(request.zip())
+                    .description(request.description())
+                    .monitorId(user.getId())
+                    .disciplineId(discipline.getId())
+                    .level(request.level())
+                    .weatherId(savedWeather.getId())
+                    .waitListId(waitList.getId())
+                    .startsAt(request.startsAt())
+                    .duration(request.duration())
+                    .location(location)
+                    .priceDetails(request.priceDetails())
+                    .capacity(request.capacity())
+                    .build();
+            
+            Event saved = repository.save(event);
+            
+            
+            // RESPONSE
+            return new EventResponse(
+                    saved.getId(),
+                    saved.getEventImgUrl(),
+                    saved.getName(),
+                    saved.getPlaceCommonName(),
+                    saved.getAddress(),
+                    saved.getCity(),
+                    saved.getRegion(),
+                    saved.getCountryCode(),
+                    saved.getZip(),
+                    saved.getDescription(),
+                    saved.getMonitorId(),
+                    saved.getDisciplineId(),
+                    saved.getLevel().name(),
+                    saved.getWaitListId(),
+                    saved.getStartsAt(),
+                    saved.getDuration(),
+                    saved.getEndsAt(),
+                    savedWeather,
+                    saved.getLocation(),
+                    saved.getPriceDetails(),
+                    saved.getCapacity(),
+                    Event.EventStatus.ACTIVE.getDescription()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Error al subir la imagen del envento");
         }
-        
-        Discipline discipline = disciplineRepository.findById(request.disciplineId())
-                .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
-        
-        
-        // OBTENER COORDENADAS
-        EventLocation location = EventLocation.builder()
-                .coordsType(GeoJsonObjectType.POINT)
-                .coords(geocodingService.getCoordinates(
-                        request.address(),
-                        request.city(),
-                        request.region(),
-                        request.country()))
-                .build();
-        
-        // CREAR WEATHER
-        Weather weather = weatherService.getCurrentWeather(
-                location.getCoords().longitud(),
-                location.getCoords().latitud()
-        );
-        
-        Weather savedWeather = weatherRepository.save(weather);
-        
-        // CREAR WAITLIST
-        WaitList waitList = waitListRepository.save(new WaitList());
-        
-        // SUBIR IMAGEN
-        String eventImgUrl = bucketService.uploadFile(request.eventImgUrl(), "events");
-        
-        // CREAR EVENTO
-        Event event = Event.builder()
-                .name(request.name())
-                .eventImgUrl(eventImgUrl)
-                .placeCommonName(request.placeCommonName())
-                .address(request.address())
-                .city(request.city())
-                .region(request.region())
-                .countryCode(request.country())
-                .zip(request.zip())
-                .description(request.description())
-                .monitorId(user.getId())
-                .disciplineId(discipline.getId())
-                .level(request.level())
-                .weatherId(savedWeather.getId())
-                .waitListId(waitList.getId())
-                .startsAt(request.startsAt())
-                .duration(request.duration())
-                .location(location)
-                .priceDetails(request.priceDetails())
-                .capacity(request.capacity())
-                .build();
-        
-        Event saved = repository.save(event);
-        
-        
-        // RESPONSE
-        return new EventResponse(
-                saved.getId(),
-                saved.getEventImgUrl(),
-                saved.getName(),
-                saved.getPlaceCommonName(),
-                saved.getAddress(),
-                saved.getCity(),
-                saved.getRegion(),
-                saved.getCountryCode(),
-                saved.getZip(),
-                saved.getDescription(),
-                saved.getMonitorId(),
-                saved.getDisciplineId(),
-                saved.getLevel().name(),
-                saved.getWaitListId(),
-                saved.getStartsAt(),
-                saved.getDuration(),
-                saved.getEndsAt(),
-                savedWeather,
-                saved.getLocation(),
-                saved.getPriceDetails(),
-                saved.getCapacity(),
-                Event.EventStatus.ACTIVE.getDescription()
-        );
     }
     
     
