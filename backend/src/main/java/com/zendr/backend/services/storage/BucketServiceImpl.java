@@ -3,6 +3,7 @@ package com.zendr.backend.services.storage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -24,7 +25,7 @@ public class BucketServiceImpl implements BucketService {
     
     private final S3Client s3Client;
     
-    
+    @Transactional
     public String uploadFile(MultipartFile file, String folder) {
         
         try {

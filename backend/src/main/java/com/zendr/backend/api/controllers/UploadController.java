@@ -20,7 +20,7 @@ public class UploadController {
     
     
     @PostMapping("/user-image")
-    public ResponseEntity<String> uploadUserImage(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> uploadUserImage(@RequestParam("file") MultipartFile file) {
         
         try {
             String url = storageService.uploadFile(file, "users");
@@ -33,9 +33,14 @@ public class UploadController {
     }
     
     @PostMapping("/event-image")
-    public ResponseEntity<String> uploadEventImage(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> uploadEventImage(@RequestParam("file") MultipartFile file) {
         
-        String url = storageService.uploadFile(file, "events");
-        return ResponseEntity.ok(url);
+        try {
+            String url = storageService.uploadFile(file, "events");
+            return ResponseEntity.ok(url);
+            
+        } catch (IOException e) {
+            return ResponseEntity.noContent().build();
+        }
     }
 }
