@@ -1,6 +1,5 @@
 package com.zendr.backend.services.geocoding;
 
-import com.zendr.backend.internal.event.dtos.SearchEventDTO;
 import com.zendr.backend.internal.event.model.EventLocation;
 import com.zendr.backend.internal.weather.model.dtos.GeocodingResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,11 @@ import java.util.Map;
 public class GeocodingServiceImpl implements GeocodingService {
     
     @Value("${application.tomtom.api-key}")
-    private String apiKey;
+    private String geocodeKey;
+    
+    @Value("${application.tomtom.search-key}")
+    private String searchKey;
+    
     private final WebClient tomTomWebClient;
     
     public EventLocation.Coordinates getCoordinates(
@@ -46,7 +49,7 @@ public class GeocodingServiceImpl implements GeocodingService {
                         .queryParam("limit", 1)
                         .queryParam("countrySet", countryCode)
                         .queryParam("view", "Unified")
-                        .queryParam("key", apiKey)
+                        .queryParam("key", geocodeKey)
                         .build(query)
                 )
                 .retrieve()
@@ -70,12 +73,14 @@ public class GeocodingServiceImpl implements GeocodingService {
         
         Map<String, Object> response = tomTomWebClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/search/2/geocode/{query}.json")
-                        .queryParam("storeResult", false)
+                        .path("/search/2/search/{query}.json")
                         .queryParam("typeahead", true)
                         .queryParam("limit", 10)
+                        .queryParam("minFuzzyLevel", 1)
+                        .queryParam("maxFuzzyLevel", 2)
                         .queryParam("view", "Unified")
-                        .queryParam("key", apiKey)
+                        .queryParam("relatedPois", "off")
+                        .queryParam("key", searchKey)
                         .queryParam("countrySet", "ES")
                         .build(search)
                 )
