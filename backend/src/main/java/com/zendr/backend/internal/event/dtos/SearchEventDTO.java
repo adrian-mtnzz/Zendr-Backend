@@ -7,7 +7,9 @@ import java.util.Currency;
 public record SearchEventDTO(
         
         double temparatureInCelsius,
+        String weatherIconUrl,
         double distance,
+        String eventImageUrl,
         String name,
         String placeCommonName,
         String disciplineName,

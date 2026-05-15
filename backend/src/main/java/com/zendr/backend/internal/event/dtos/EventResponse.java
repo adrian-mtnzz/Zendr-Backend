@@ -12,6 +12,7 @@ import java.util.List;
 public record EventResponse(
         
         String id,
+        String eventImgUrl,
         String name,
         String placeCommonName,
         String address,

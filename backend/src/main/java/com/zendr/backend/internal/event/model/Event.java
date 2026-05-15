@@ -22,6 +22,9 @@ public class Event {
     @Setter(AccessLevel.NONE)
     private String id;
     
+    @NotBlank(message = "La imagen del evento no puede estar vacía")
+    private String eventImgUrl;
+    
     @NotBlank(message = "El nombre del evento no puede estar vacío")
     private String name;
     
@@ -106,7 +109,8 @@ public class Event {
             String id, String name, String placeCommonName, String address, String city, String region,
             String countryCode, String zip, String description, String monitorId, String disciplineId,
             String level, String weatherId, String waitListId, Instant startsAt, Duration duration,
-            EventLocation location, EventPriceDetails priceDetails, EventCapacity capacity, String search) {
+            EventLocation location, EventPriceDetails priceDetails, EventCapacity capacity, String eventImgUrl,
+            String search) {
        
         this.id = id;
         this.name = name;
@@ -129,6 +133,7 @@ public class Event {
         this.priceDetails = priceDetails;
         this.capacity = capacity;
         this.status = EventStatus.ACTIVE;
+        this.eventImgUrl = eventImgUrl;
         this.search = buildSearchField();
     
     }

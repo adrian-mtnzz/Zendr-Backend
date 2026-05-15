@@ -7,6 +7,7 @@ import com.zendr.backend.internal.user.model.enums.FavDisciplinesCurrentLevel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.Duration;
@@ -16,6 +17,9 @@ public record CreateEventRequest(
     
     @NotBlank(message = "El nombre del evento no puede estar vacío")
     String name,
+    
+    @NotBlank(message = "La imagen del evento no puede estar vacía")
+    MultipartFile eventImgUrl,
     
     @NotBlank(message = "El nombre común del lugar no puede estar vacío")
     String placeCommonName,

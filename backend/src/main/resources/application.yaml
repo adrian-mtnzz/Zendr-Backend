@@ -37,6 +37,15 @@ application:
   openweather:
     api-key: ${ZENDR_OPENWEATHER_API_KEY}
 
+  storage:
+    endpoint: ${ZENDR_BUCKET_ENDPOINT}
+    domain: ${ZENDR_BUCKET_DOMAIN}
+    region: auto
+    bucket: ${ZENDR_BUCKET_NAME}
+    access-key: ${ZENDR_BUCKET_ACCESS_KEY}
+    secret-key: ${ZENDR_BUCKET_SECRET_KEY}
+
+
   #jackson:
     #serialization:
       #writeDatesAsTimestamps: false

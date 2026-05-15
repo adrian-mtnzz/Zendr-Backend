@@ -17,6 +17,7 @@ import com.zendr.backend.internal.waitList.repository.WaitListRepository;
 import com.zendr.backend.internal.weather.model.Weather;
 import com.zendr.backend.internal.weather.repository.WeatherRepository;
 import com.zendr.backend.services.geocoding.GeocodingService;
+import com.zendr.backend.services.storage.BucketService;
 import com.zendr.backend.services.weather.WeatherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,7 +44,7 @@ public class EventServiceImpl implements EventService {
     private final WaitListRepository waitListRepository;
     private final GeocodingService geocodingService;
     private final WeatherService weatherService;
-    
+    private final BucketService bucketService;
     
     @Transactional
     public EventResponse save(CreateEventRequest request) {
@@ -82,10 +83,13 @@ public class EventServiceImpl implements EventService {
         // CREAR WAITLIST
         WaitList waitList = waitListRepository.save(new WaitList());
         
+        // SUBIR IMAGEN
+        String eventImgUrl = bucketService.uploadFile(request.eventImgUrl(), "events");
         
         // CREAR EVENTO
         Event event = Event.builder()
                 .name(request.name())
+                .eventImgUrl(eventImgUrl)
                 .placeCommonName(request.placeCommonName())
                 .address(request.address())
                 .city(request.city())
@@ -111,6 +115,7 @@ public class EventServiceImpl implements EventService {
         // RESPONSE
         return new EventResponse(
                 saved.getId(),
+                saved.getEventImgUrl(),
                 saved.getName(),
                 saved.getPlaceCommonName(),
                 saved.getAddress(),
@@ -163,12 +168,14 @@ public class EventServiceImpl implements EventService {
                     
                     return new SearchEventDTO(
                             weather.getTemperatureInCelsius(),
+                            weather.getIconUrl(),
                             distance(
                                     coords[0],
                                     coords[1],
                                     event.getLocation().getCoords().latitud(),
                                     event.getLocation().getCoords().longitud()
                             ),
+                            event.getEventImgUrl(),
                             event.getName(),
                             event.getPlaceCommonName(),
                             discipline.getName(),
@@ -401,7 +408,7 @@ public class EventServiceImpl implements EventService {
                 .toList();
     }
     
-    
+    // Formula de Haversine
     private double distance(
             double lat1, double lon1,
             double lat2, double lon2
