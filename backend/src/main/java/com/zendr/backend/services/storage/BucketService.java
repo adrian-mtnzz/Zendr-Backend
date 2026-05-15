@@ -6,4 +6,5 @@ import java.io.IOException;
 
 public interface BucketService {
     public String uploadFile(MultipartFile file, String folder) throws IOException;
+    String generatePresignedUrl(String key);
 }

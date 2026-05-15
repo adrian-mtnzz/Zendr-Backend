@@ -7,9 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -24,8 +29,9 @@ public class BucketServiceImpl implements BucketService {
     private String domain;
     
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
     
-    @Transactional
+    
     public String uploadFile(MultipartFile file, String folder) {
         
         try {
@@ -38,8 +44,7 @@ public class BucketServiceImpl implements BucketService {
                     .substring(file.getOriginalFilename()
                             .lastIndexOf("."));
             
-            String fileName =
-                    folder + "/" + UUID.randomUUID() + extension;
+            String fileName = folder + "/" + UUID.randomUUID() + extension;
             
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucket)
@@ -52,15 +57,30 @@ public class BucketServiceImpl implements BucketService {
                     RequestBody.fromBytes(file.getBytes())
             );
             
-            return buildFileUrl(fileName);
+            return generatePresignedUrl(fileName);
             
         } catch (IOException e) {
             return null;
         }
     }
     
-    private String buildFileUrl(String fileName) {
+    public String generatePresignedUrl(String key) {
         
-        return "https://"+bucket+"."+domain+"/"+fileName;
+        GetObjectRequest getObjectRequest =
+                GetObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(key)
+                        .build();
+        
+        GetObjectPresignRequest presignRequest =
+                GetObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofMinutes(30))
+                        .getObjectRequest(getObjectRequest)
+                        .build();
+        
+        PresignedGetObjectRequest presigned =
+                s3Presigner.presignGetObject(presignRequest);
+        
+        return presigned.url().toString();
     }
 }
