@@ -8,5 +8,5 @@ import java.util.Map;
 
 public interface GeocodingService {
     EventLocation.Coordinates getCoordinates(String address, String city, String region, String countryCode);
-    public Page<Map<String, Object>> getLocationsBySearch(String search, Pageable pageable);
+    Page<Map<String, Object>> getLocationsBySearch(String search, Pageable pageable);
 }
