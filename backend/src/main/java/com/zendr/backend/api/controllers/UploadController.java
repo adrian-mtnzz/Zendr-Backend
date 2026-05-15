@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,11 +22,15 @@ public class UploadController {
     
     
     @PostMapping("/user-image")
-    public ResponseEntity<String> uploadUserImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadUserImage(@RequestParam("file") MultipartFile file) {
         
         try {
+            
+            Map<String, String> response = new HashMap<>();
             String url = storageService.uploadFile(file, "users");
-            return ResponseEntity.ok(url);
+            response.put("url", url);
+            
+            return ResponseEntity.ok(response);
         
         } catch (IOException e) {
             return ResponseEntity.noContent().build();
@@ -33,11 +39,14 @@ public class UploadController {
     }
     
     @PostMapping("/event-image")
-    public ResponseEntity<String> uploadEventImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadEventImage(@RequestParam("file") MultipartFile file) {
         
         try {
+            Map<String, String> response = new HashMap<>();
             String url = storageService.uploadFile(file, "events");
-            return ResponseEntity.ok(url);
+            response.put("url", url);
+            
+            return ResponseEntity.ok(response);
             
         } catch (IOException e) {
             return ResponseEntity.noContent().build();
