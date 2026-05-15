@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class BucketServiceImpl {
+public class BucketServiceImpl implements BucketService {
     
     @Value("${application.storage.bucket}")
     private String bucket;
