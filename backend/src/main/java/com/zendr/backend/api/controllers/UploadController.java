@@ -22,8 +22,14 @@ public class UploadController {
     @PostMapping("/user-image")
     public ResponseEntity<String> uploadUserImage(@RequestParam("file") MultipartFile file) throws IOException {
         
-        String url = storageService.uploadFile(file, "users");
-        return ResponseEntity.ok(url);
+        try {
+            String url = storageService.uploadFile(file, "users");
+            return ResponseEntity.ok(url);
+        
+        } catch (IOException e) {
+            return ResponseEntity.noContent().build();
+        }
+        
     }
     
     @PostMapping("/event-image")

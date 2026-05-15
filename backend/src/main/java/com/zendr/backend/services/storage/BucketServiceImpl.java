@@ -25,33 +25,37 @@ public class BucketServiceImpl implements BucketService {
     private final S3Client s3Client;
     
     
-    public String uploadFile(MultipartFile file, String folder)
-            throws IOException {
+    public String uploadFile(MultipartFile file, String folder) {
         
-        if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
-            throw new IllegalArgumentException("Solo se pueden subir imagenes");
-        }
-        
-        String extension = Objects.requireNonNull(
-                file.getOriginalFilename())
+        try {
+            if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
+                throw new IllegalArgumentException("Solo se pueden subir imagenes");
+            }
+            
+            String extension = Objects.requireNonNull(
+                            file.getOriginalFilename())
                     .substring(file.getOriginalFilename()
-                    .lastIndexOf("."));
-        
-        String fileName =
-                folder + "/" + UUID.randomUUID() + extension;
-        
-        PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(fileName)
-                .contentType(file.getContentType())
-                .build();
-        
-        s3Client.putObject(
-                request,
-                RequestBody.fromBytes(file.getBytes())
-        );
-        
-        return buildFileUrl(fileName);
+                            .lastIndexOf("."));
+            
+            String fileName =
+                    folder + "/" + UUID.randomUUID() + extension;
+            
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(fileName)
+                    .contentType(file.getContentType())
+                    .build();
+            
+            s3Client.putObject(
+                    request,
+                    RequestBody.fromBytes(file.getBytes())
+            );
+            
+            return buildFileUrl(fileName);
+            
+        } catch (IOException e) {
+            return null;
+        }
     }
     
     private String buildFileUrl(String fileName) {
