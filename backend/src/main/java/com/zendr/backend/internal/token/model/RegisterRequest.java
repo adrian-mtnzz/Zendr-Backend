@@ -18,8 +18,6 @@ public record RegisterRequest(
         @NotBlank(message = "Los apellidos no pueden estar vacíos")
         String surname,
         
-        String profileImg,
-        
         @NotBlank(message = "El email no puede estar vacío")
         @Email(message = "El email no es válido")
         String email,
