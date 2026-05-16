@@ -160,7 +160,11 @@ public class EventServiceImpl implements EventService {
     }
     
     @Transactional
-    @PreAuthorize("@eventRepository.findById(#eventId).get().monitor.id == authentication.principal.id")
+    @PreAuthorize("""
+    @userRepository.findById(
+        @eventRepository.findById(#eventId).get().monitorId
+    ).get().email == authentication.name
+    """)
     public boolean cancelEvent(String eventId) {
         
         Event event = repository.findById(eventId)
