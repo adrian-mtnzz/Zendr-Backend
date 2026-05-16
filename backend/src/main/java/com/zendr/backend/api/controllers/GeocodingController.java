@@ -1,5 +1,6 @@
 package com.zendr.backend.api.controllers;
 
+import com.zendr.backend.internal.event.dtos.tomtom.LocationResultDTO;
 import com.zendr.backend.services.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -21,7 +22,7 @@ public class GeocodingController {
     private final GeocodingService service;
     
     @PostMapping
-    public ResponseEntity<Page<Map<String, Object>>> getSearchLocations(@RequestBody Map<String, String> body, Pageable page) {
+    public ResponseEntity<Page<LocationResultDTO>> getSearchLocations(@RequestBody Map<String, String> body, Pageable page) {
         
         if (body.get("search") != null) {
             return ResponseEntity.ok(service.getLocationsBySearch(body.get("search"), page));

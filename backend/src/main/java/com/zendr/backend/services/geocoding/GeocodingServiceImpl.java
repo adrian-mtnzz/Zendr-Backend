@@ -1,5 +1,6 @@
 package com.zendr.backend.services.geocoding;
 
+import com.zendr.backend.internal.event.dtos.tomtom.*;
 import com.zendr.backend.internal.event.model.EventLocation;
 import com.zendr.backend.internal.weather.model.dtos.GeocodingResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -69,45 +71,68 @@ public class GeocodingServiceImpl implements GeocodingService {
         );
     }
     
-    public Page<Map<String, Object>> getLocationsBySearch(String search, Pageable pageable) {
-        System.out.println(searchKey);
-        Map<String, Object> response = tomTomWebClient.get()
+    public Page<LocationResultDTO>  getLocationsBySearch(String search, Pageable pageable) {
+        
+        TomTomSearchResponse response = tomTomWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/search/2/search/{query}.json")
                         .queryParam("typeahead", true)
-                        .queryParam("limit", 10)
+                        .queryParam("limit", pageable.getPageSize())
+                        .queryParam("ofs", pageable.getOffset())
                         .queryParam("minFuzzyLevel", 1)
                         .queryParam("maxFuzzyLevel", 2)
                         .queryParam("view", "Unified")
                         .queryParam("relatedPois", "off")
+                        .queryParam("idxSet", "Geo,Addr,Str,PAD,POI")
                         .queryParam("countrySet", "ES")
                         .queryParam("key", searchKey)
                         .build(search)
                 )
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .bodyToMono(TomTomSearchResponse.class)
                 .block();
         
-        if (response == null || !response.containsKey("results")) {
-            throw new IllegalArgumentException("No se han encontrado resultados");
-        }
-        
-        List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
-        
-        if (results.isEmpty()) {
+        if (response == null || response.results() == null) {
             return new PageImpl<>(List.of(), pageable, 0);
         }
         
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), results.size());
+        List<LocationResultDTO> results = response.results()
+                .stream()
+                .map(this::toDTO)
+                .toList();
         
-        if (start >= results.size()) {
-            
-            return new PageImpl<>(List.of(), pageable, results.size());
-        }
+        int total = response.summary() != null
+                ? response.summary().totalResults()
+                : results.size();
         
-        List<Map<String, Object>> pageContent = results.subList(start, end);
+        return new PageImpl<>(
+                results,
+                pageable,
+                total
+        );
         
-        return new PageImpl<>(pageContent, pageable, results.size());
+    }
+    
+    private LocationResultDTO toDTO(TomTomResult r) {
+        
+        return new LocationResultDTO(
+                r.id(),
+                r.type(),
+                r.score(),
+                Optional.ofNullable(r.address())
+                        .map(a -> new AddressDTO(
+                                a.streetNumber(),
+                                a.streetName(),
+                                a.municipality(),
+                                a.postalCode(),
+                                a.country(),
+                                a.countryCode(),
+                                a.freeformAddress()
+                        ))
+                        .orElse(null),
+                Optional.ofNullable(r.position())
+                        .map(p -> new PositionDTO(p.lat(), p.lon()))
+                        .orElse(null)
+        );
     }
 }
