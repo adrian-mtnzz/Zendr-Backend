@@ -161,11 +161,10 @@ public class EventServiceImpl implements EventService {
     
     @Transactional
     @PreAuthorize("""
-    hasAuthority('ADMIN')
-        ||
-        @userRepository.findById(
-            @eventRepository.findById(#eventId).orElse(null)?.monitorId
-        ).orElse(null)?.email == authentication.name
+    hasRole('ADMIN') ||
+    @userRepository.findById(
+        @eventRepository.findById(#eventId).get().monitorId
+    ).get().email == authentication.name
     """)
     public boolean cancelEvent(String eventId) {
         
