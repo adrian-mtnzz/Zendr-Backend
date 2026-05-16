@@ -325,10 +325,11 @@ public class EventServiceImpl implements EventService {
                 .filter(e -> {
                     if (filters.isBefore() == null) return true;
                     
-                    return e.getStartsAt().isBefore(filters.isBefore());
+                    Instant start = Instant.from(e.getStartsAt());
+                    return start.isBefore(filters.isBefore());
                 })
                 
-                // SEARCH flexible
+                // SEARCH
                 .filter(e -> {
                     if (filters == null || filters.search() == null || filters.search().isBlank()) {
                         return true;
