@@ -1,7 +1,13 @@
 package com.zendr.backend.internal.user.model;
 
+import com.zendr.backend.services.storage.BucketService;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class UserMapper {
 
+    private static BucketService bucketService;
+    
     public static UserDTO toDTO(User user) {
         if (user == null) return null;
 
@@ -10,7 +16,7 @@ public class UserMapper {
                 user.getUsername(),
                 user.getName(),
                 user.getSurname(),
-                user.getProfileImg()
+                bucketService.generatePresignedUrl(user.getProfileImg())
         );
     }
 }
