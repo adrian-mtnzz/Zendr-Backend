@@ -12,6 +12,7 @@ import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
 import com.zendr.backend.services.device.DeviceService;
 import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
+import com.zendr.backend.services.storage.BucketService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +22,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +45,11 @@ public class AuthServiceImpl implements AuthService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
     
-    public TokenResponse register(final RegisterRequest request) {
+    private final BucketService bucketService;
+    
+    
+    public TokenResponse register(final RegisterRequest request, MultipartFile file) {
+        
         
         if (request.username() == null || repository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("El nombre de usuario no es válido");
@@ -68,6 +76,17 @@ public class AuthServiceImpl implements AuthService {
         
         if (!authCodeService.validateCode(request.email(), request.code())) {
             throw new IllegalArgumentException("Código incorrecto");
+        }
+        
+        String profileImgUrl = "";
+        try {
+            // SUBIR IMAGEN
+            profileImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
+                    ? bucketService.uploadFile(file, "users")
+                    : "users/dbede52b-801a-49ce-8765-535bc02fad1f.png"; // Fallback imagen para eventos
+        
+        } catch (IOException e) {
+            profileImgUrl = "users/dbede52b-801a-49ce-8765-535bc02fad1f.png";
         }
         
         User user = User.builder()

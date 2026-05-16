@@ -37,7 +37,7 @@ public class User {
 
     @NotNull(message = "Los apellidos no pueden estar vacíos")
     private String surname;
-
+    
     private String profileImg;
 
     @NotNull(message = "El email no puede estar vacío")

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +24,11 @@ public class AuthController {
     private final UserService userService;
     
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody @Valid RegisterRequest request) {
-        final TokenResponse response = service.register(request);
+    public ResponseEntity<TokenResponse> register(
+            @RequestBody @Valid RegisterRequest request,
+            @RequestParam MultipartFile file
+    ) {
+        final TokenResponse response = service.register(request, file);
         return ResponseEntity.ok(response);
     }
     
