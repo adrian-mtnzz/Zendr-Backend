@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface EventService {
     EventResponse save(CreateEventRequest request, MultipartFile file);
+    EventDetailsResponse update(String id, UpdateEventRequest request, MultipartFile file);
     Page<SearchEventDTO> filterAndOrderAllEvents(SearchEventsRequest request, Pageable pageable);
     EventDetailsResponse getEventDetails(String eventId);
     public boolean cancelEvent(String eventId);

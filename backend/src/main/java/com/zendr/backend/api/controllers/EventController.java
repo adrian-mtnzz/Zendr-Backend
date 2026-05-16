@@ -33,6 +33,7 @@ public class EventController {
         );
     }
     
+    
     @PostMapping("/search")
     public ResponseEntity<Page<SearchEventDTO>> searchEvents(
             @Valid @RequestBody SearchEventsRequest request,
@@ -49,6 +50,19 @@ public class EventController {
                 service.getEventDetails(id)
         );
     }
+    
+    
+    @PatchMapping("/{id}/")
+    public ResponseEntity<EventDetailsResponse> updateEvent(
+            @PathVariable String id,
+            @RequestPart MultipartFile file,
+            @RequestPart UpdateEventRequest request
+    ) {
+        return ResponseEntity.ok(
+                service.update(id, request, file)
+        );
+    }
+    
     
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<Map<String, Boolean>> cancelEvent(

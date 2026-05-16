@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.function.EntityResponse;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -189,13 +190,17 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
+    
     @PatchMapping("/{id}/role")
-    public ResponseEntity<String> updateRole(@PathVariable String id, @RequestParam String role) {
+    public ResponseEntity<Map<String, String>> updateRole(@PathVariable String id, @RequestParam String role) {
 
-        return service.updateRole(id, UserRole.valueOf(role))
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("role", service.updateRole(id, UserRole.valueOf(role)).orElseThrow(
+                () -> new IllegalArgumentException("No se ha podido actualizar el rol")
+        ));
+        
+        return ResponseEntity.ok(response);
     }
 
 

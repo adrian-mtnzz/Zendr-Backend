@@ -233,6 +233,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    // ANULADO hasta implementación pagos
+    // @PreAuthorize("hasRole('ADMIN')")
     public Optional<String> updateRole(String id, UserRole role) {
 
         if (role == null) {

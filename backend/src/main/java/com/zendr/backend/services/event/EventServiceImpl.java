@@ -10,7 +10,6 @@ import com.zendr.backend.internal.event.dtos.*;
 import com.zendr.backend.internal.event.model.Event;
 import com.zendr.backend.internal.event.model.EventLocation;
 import com.zendr.backend.internal.event.repository.EventRepository;
-import com.zendr.backend.internal.user.model.FavDisciplines;
 import com.zendr.backend.internal.user.model.User;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
@@ -18,11 +17,10 @@ import com.zendr.backend.internal.waitList.model.WaitList;
 import com.zendr.backend.internal.waitList.repository.WaitListRepository;
 import com.zendr.backend.internal.weather.model.Weather;
 import com.zendr.backend.internal.weather.repository.WeatherRepository;
-import com.zendr.backend.services.booking.BookingService;
 import com.zendr.backend.services.geocoding.GeocodingService;
 import com.zendr.backend.services.storage.BucketService;
 import com.zendr.backend.services.weather.WeatherService;
-import jakarta.mail.Multipart;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.*;
 import java.util.*;
@@ -57,6 +54,11 @@ public class EventServiceImpl implements EventService {
     
     
     @Transactional
+    @PreAuthorize("""
+    hasRole('MONITOR') ||
+    hasRole('MANAGER') ||
+    hasRole('ADMIN')
+    """)
     public EventResponse save(CreateEventRequest request, MultipartFile file) {
         
         // VALIDACIONES INICIALES
@@ -239,21 +241,88 @@ public class EventServiceImpl implements EventService {
                 .build();
     }
     
-    /*
-    public EventDetailsResponse updateEventDetails(MultipartFile eventImg, String description, BigDecimal price, String id) {
-        if (eventImg != null) try {
-            
+    
+    
+    @Transactional
+    @PreAuthorize("""
+    hasRole('ADMIN') ||
+    @userRepository.findById(
+        @eventRepository.findById(#eventId).get().monitorId
+    ).get().email == authentication.name
+    """)
+    public EventDetailsResponse update(String id, UpdateEventRequest request, MultipartFile file) {
+        
+        Event event = repository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("No se ha podido encontrar el evento")
+        );
+        
+        if (file!= null) try {
             
             // SUBIR IMAGEN
-            if (Objects.requireNonNull(eventImg.getContentType()).startsWith("image/")) {
-                String eventImgUrl = bucketService.uploadFile(eventImg, "events");
+            if (Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
+                String eventImg = bucketService.uploadFile(file, "events");
+                event.setEventImgUrl(eventImg);
             }
             
         } catch (IOException e) {
+            throw new IllegalArgumentException("La imagen no se ha subido correctamente");
         
         }
+        
+        if (request != null) {
+            if (request.description() != null && !request.description().isBlank()) {
+                event.setDescription(request.description().trim());
+            }
+            
+            if (
+                    request.price() != null
+                    && !(request.price().doubleValue() < 0.00)
+                    && event.getCapacity().getActualBookings() == 0) {
+                
+                event.getPriceDetails().setPrice(request.price());
+            }
+        }
+        repository.save(event);
+        
+        return EventDetailsResponse.builder()
+                .id(event.getId())
+                .eventImgUrl(bucketService.generatePresignedUrl(event.getEventImgUrl()))
+                .name(event.getName())
+                .placeCommonName(event.getPlaceCommonName())
+                .address(event.getAddress())
+                .city(event.getCity())
+                .region(event.getRegion())
+                .countryCode(event.getCountryCode())
+                .zip(event.getZip())
+                .description(event.getDescription())
+                .monitorId(event.getMonitorId())
+                .monitorProfileImg(
+                        bucketService
+                            .generatePresignedUrl(
+                                userRepository
+                                    .findById(event.getMonitorId())
+                                    .get().getProfileImg())
+                )
+                .monitorName(
+                        userRepository
+                            .findById(event.getMonitorId())
+                            .get().getName()
+                )
+                .disciplineId(event.getDisciplineId())
+                .level(event.getLevel().getDescription())
+                .waitListId(event.getWaitListId())
+                .startsAt(event.getStartsAt())
+                .duration(event.getDuration())
+                .weather(
+                        weatherRepository
+                                .findById(event.getWeatherId()).get())
+                .location(event.getLocation())
+                .priceDetails(event.getPriceDetails())
+                .capacity(event.getCapacity())
+                .status(event.getStatus().getDescription())
+                .build();
     }
-    */
+    
     
     public Page<SearchEventDTO> filterAndOrderAllEvents(
             SearchEventsRequest request,
@@ -332,8 +401,44 @@ public class EventServiceImpl implements EventService {
         
         return events.stream()
                 
+                // EVENTOS DE UN USUARIO INCLUYE CANCELADOS POR MONITOR
+                .filter(e ->
+                        filters == null ||
+                                filters.userId() == null ||
+                                bookingRepository.findByEventId(e.getId())
+                                        .stream()
+                                        .anyMatch(booking ->
+                                                booking.getUserId().equals(filters.userId())
+                                        )
+                )
                 // EVENTOS ACTIVOS
-                .filter(e -> e.getStartsAt().isAfter(Instant.now()))
+                .filter(e ->
+                        filters != null && filters.userId() != null ||
+                                (e.getStartsAt().isAfter(Instant.now())
+                                        && e.getStatus() == Event.EventStatus.ACTIVE)
+                )
+                
+                // EVENTOS PROXIMOS
+                .filter(e ->  {
+                    
+                    if (filters == null || filters.isAfter() == null) return true;
+                    
+                    Instant start = Instant.from(e.getStartsAt());
+                    Instant filter = Instant.from(filters.isBefore());
+                    return start.isAfter(filter);
+                    
+                })
+                
+                // EVENTOS PASADOS
+                .filter(e ->  {
+                    
+                    if (filters == null || filters.isBefore() == null) return true;
+                    
+                    Instant start = Instant.from(e.getStartsAt());
+                    Instant filter = Instant.from(filters.isBefore());
+                    
+                    return start.isBefore(filter);
+                })
                 
                 // PRECIO (<=)
                 .filter(e ->
@@ -342,14 +447,6 @@ public class EventServiceImpl implements EventService {
                                 e.getPriceDetails().getPrice().compareTo(filters.price()) <= 0
                 )
                 
-                // FECHA
-                .filter(e -> {
-                    if (filters.isBefore() == null) return true;
-                    
-                    Instant start = Instant.from(e.getStartsAt());
-                    Instant filter = Instant.from(filters.isBefore());
-                    return start.isBefore(filter);
-                })
                 
                 // SEARCH
                 .filter(e -> {
@@ -494,7 +591,7 @@ public class EventServiceImpl implements EventService {
             double[] coords
     ) {
         
-        if (coords == null || coords.length != 3) {
+        if (coords == null || coords.length != 2) {
             return events;
         }
         
