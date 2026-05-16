@@ -24,7 +24,7 @@ public class EventController {
     
     @PostMapping()
     public ResponseEntity<EventResponse> createEvent(
-            @Valid @RequestBody CreateEventRequest request,
+            @Valid @RequestPart CreateEventRequest request,
             @RequestPart(name = "file", required = false) MultipartFile file
     ) {
         return ResponseEntity.ok(
