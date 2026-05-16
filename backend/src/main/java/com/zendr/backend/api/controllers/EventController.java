@@ -52,10 +52,10 @@ public class EventController {
     
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<Map<String, Boolean>> cancelEvent(
-            @PathVariable String eventId) {
+            @PathVariable String id) {
             
         Map<String, Boolean> response = new HashMap<>();
-        response.put("cancelled", service.cancelEvent(eventId));
+        response.put("cancelled", service.cancelEvent(id));
         return ResponseEntity.ok(response);
     }
 }
