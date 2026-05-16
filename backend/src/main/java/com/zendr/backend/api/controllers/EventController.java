@@ -40,7 +40,7 @@ public class EventController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<EventDetailsResponse> getEventDetails(@RequestParam String id) {
+    public ResponseEntity<EventDetailsResponse> getEventDetails(@PathVariable String id) {
         return ResponseEntity.ok(
                 service.getEventDetails(id)
         );
