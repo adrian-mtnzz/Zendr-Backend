@@ -25,7 +25,7 @@ public class EventController {
     @PostMapping()
     public ResponseEntity<EventResponse> createEvent(
             @Valid @RequestBody CreateEventRequest request,
-            @RequestParam(name = "file", required = false) MultipartFile file
+            @RequestPart(name = "file", required = false) MultipartFile file
     ) {
         return ResponseEntity.ok(
                 service.save(request, file)
