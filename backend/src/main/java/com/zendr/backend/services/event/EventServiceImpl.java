@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.Normalizer;
@@ -48,7 +49,7 @@ public class EventServiceImpl implements EventService {
     private final BucketService bucketService;
     
     @Transactional
-    public EventResponse save(CreateEventRequest request) {
+    public EventResponse save(CreateEventRequest request, MultipartFile file) {
         
         try {
             // VALIDACIONES INICIALES
@@ -86,7 +87,9 @@ public class EventServiceImpl implements EventService {
             WaitList waitList = waitListRepository.save(new WaitList());
             
             // SUBIR IMAGEN
-            String eventImgUrl = bucketService.uploadFile(request.eventImgUrl(), "events");
+            String eventImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
+                    ? bucketService.uploadFile(file, "events")
+                    : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
             
             // CREAR EVENTO
             Event event = Event.builder()

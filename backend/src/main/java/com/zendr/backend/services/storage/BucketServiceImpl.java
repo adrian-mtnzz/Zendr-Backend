@@ -57,7 +57,7 @@ public class BucketServiceImpl implements BucketService {
                     RequestBody.fromBytes(file.getBytes())
             );
             
-            return generatePresignedUrl(fileName);
+            return fileName;
             
         } catch (IOException e) {
             return null;
@@ -78,9 +78,7 @@ public class BucketServiceImpl implements BucketService {
                         .getObjectRequest(getObjectRequest)
                         .build();
         
-        PresignedGetObjectRequest presigned =
-                s3Presigner.presignGetObject(presignRequest);
-        
+        PresignedGetObjectRequest presigned = s3Presigner.presignGetObject(presignRequest);
         return presigned.url().toString();
     }
 }

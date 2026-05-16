@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -22,9 +23,12 @@ public class EventController {
     
     
     @PostMapping()
-    public ResponseEntity<EventResponse> createEvent(@Valid @RequestBody CreateEventRequest request) {
+    public ResponseEntity<EventResponse> createEvent(
+            @Valid @RequestBody CreateEventRequest request,
+            @RequestParam("file") MultipartFile file
+    ) {
         return ResponseEntity.ok(
-                service.save(request)
+                service.save(request, file)
         );
     }
     

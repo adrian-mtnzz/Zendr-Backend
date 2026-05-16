@@ -12,19 +12,19 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/upload")
-public class UploadController {
+@RequestMapping("/api/storage")
+public class StorageController {
     
     private final BucketService storageService;
     
     
-    @PostMapping("/user-image")
+    @PostMapping("/upload/user-image")
     public ResponseEntity<Map<String, String>> uploadUserImage(@RequestParam("file") MultipartFile file) {
         
         try {
             
             Map<String, String> response = new HashMap<>();
-            String url = storageService.uploadFile(file, "users");
+            String url = storageService.generatePresignedUrl(storageService.uploadFile(file, "users"));
             response.put("url", url);
             
             return ResponseEntity.ok(response);
@@ -35,12 +35,12 @@ public class UploadController {
         
     }
     
-    @PostMapping("/event-image")
+    @PostMapping("/upload/event-image")
     public ResponseEntity<Map<String, String>> uploadEventImage(@RequestParam("file") MultipartFile file) {
         
         try {
             Map<String, String> response = new HashMap<>();
-            String url = storageService.uploadFile(file, "events");
+            String url =  storageService.generatePresignedUrl(storageService.uploadFile(file, "events"));
             response.put("url", url);
             
             return ResponseEntity.ok(response);
@@ -50,13 +50,12 @@ public class UploadController {
         }
     }
     
-    @GetMapping("/signed-url")
+    @GetMapping("/get-resource")
     public ResponseEntity<Map<String, String>> getSignedUrl(
             @RequestParam String key
     ) {
         
         String url = storageService.generatePresignedUrl(key);
-        
         return ResponseEntity.ok(Map.of(
                 "url", url
         ));
