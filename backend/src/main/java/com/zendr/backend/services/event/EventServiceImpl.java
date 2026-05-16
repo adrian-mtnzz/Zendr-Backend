@@ -355,11 +355,11 @@ public class EventServiceImpl implements EventService {
                             .allMatch(eventText::contains);
                 })
                 
-               // // DISCIPLINAS
-               // .filter(e ->
-               //         disciplineIds.isEmpty() ||
-               //                 disciplineIds.contains(e.getDisciplineId())
-               // )
+               // DISCIPLINAS
+               .filter(e ->
+                       disciplineIds.isEmpty() ||
+                               disciplineIds.contains(e.getDisciplineId())
+               )
                 
                 // LEVELS
                 .filter(e -> {
