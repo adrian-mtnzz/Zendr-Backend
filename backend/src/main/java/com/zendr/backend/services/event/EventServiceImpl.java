@@ -89,7 +89,7 @@ public class EventServiceImpl implements EventService {
             // SUBIR IMAGEN
             String eventImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
                     ? bucketService.uploadFile(file, "events")
-                    : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
+                    : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg"; // Fallback imagen para eventos
             
             // CREAR EVENTO
             Event event = Event.builder()
@@ -120,7 +120,7 @@ public class EventServiceImpl implements EventService {
             // RESPONSE
             return new EventResponse(
                     saved.getId(),
-                    saved.getEventImgUrl(),
+                    bucketService.generatePresignedUrl(saved.getEventImgUrl()),
                     saved.getName(),
                     saved.getPlaceCommonName(),
                     saved.getAddress(),
@@ -166,7 +166,6 @@ public class EventServiceImpl implements EventService {
         
         List<SearchEventDTO> dtoList = events.stream()
                 .map(event -> {
-                    
                     Weather weather = weatherRepository.findById(event.getWeatherId())
                             .orElseThrow(() -> new IllegalArgumentException("Condiciones meteorológicas no encontradas"));
                     
@@ -183,7 +182,7 @@ public class EventServiceImpl implements EventService {
                                     event.getLocation().getCoords().latitud(),
                                     event.getLocation().getCoords().longitud()
                             ),
-                            event.getEventImgUrl(),
+                            bucketService.generatePresignedUrl(event.getEventImgUrl()),
                             event.getName(),
                             event.getPlaceCommonName(),
                             discipline.getName(),
