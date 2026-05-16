@@ -93,7 +93,10 @@ public class EventServiceImpl implements EventService {
                         ? bucketService.uploadFile(file, "events")
                         : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg"; // Fallback imagen para eventos
             } else eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
-        }catch (IOException e) {
+        
+        } catch (IOException e) {
+        
+        } finally {
             eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
         }
         
@@ -150,7 +153,58 @@ public class EventServiceImpl implements EventService {
         );
     }
     
-    
+    public EventDetailsResponse getEventDetails(String eventId) {
+        
+        Event event = repository.findById(eventId).orElseThrow(
+                () -> new IllegalArgumentException("Evento no encontrado")
+        );
+        
+        EventLocation.Coordinates coords = event.getLocation().getCoords();
+        Weather oldWeather = weatherRepository.findById(event.getWeatherId()).orElseThrow(
+                ()-> new IllegalArgumentException("No se ha encontrado el tiempo para este evento")
+        );
+        
+        Weather newWeather = weatherService.getCurrentWeather(coords.longitud(), coords.latitud());
+        
+        oldWeather.setTemperatureInCelsius(newWeather.getTemperatureInCelsius());
+        oldWeather.setCondition(newWeather.getCondition());
+        oldWeather.setDescription(newWeather.getDescription());
+        oldWeather.setIconUrl(newWeather.getIconUrl());
+        oldWeather.setAptOutdoors(newWeather.isAptOutdoors());
+        oldWeather.setLastUpdate(Instant.now());
+        
+        Weather savedWeather = weatherRepository.save(oldWeather);
+        
+        User monitor = userRepository.findById(event.getMonitorId()).orElseThrow(
+                () -> new IllegalArgumentException("No se ha encontrado al monitor")
+        );
+        
+        return EventDetailsResponse.builder()
+                .id(event.getId())
+                .eventImgUrl(bucketService.generatePresignedUrl(event.getEventImgUrl()))
+                .name(event.getName())
+                .placeCommonName(event.getPlaceCommonName())
+                .address(event.getAddress())
+                .city(event.getCity())
+                .region(event.getRegion())
+                .countryCode(event.getCountryCode())
+                .zip(event.getZip())
+                .description(event.getDescription())
+                .monitorId(event.getMonitorId())
+                .monitorProfileImg(bucketService.generatePresignedUrl(monitor.getProfileImg()))
+                .monitorName(monitor.getName())
+                .disciplineId(event.getDisciplineId())
+                .level(event.getLevel().getDescription())
+                .waitListId(event.getWaitListId())
+                .startsAt(event.getStartsAt())
+                .duration(event.getDuration())
+                .weather(savedWeather)
+                .location(event.getLocation())
+                .priceDetails(event.getPriceDetails())
+                .capacity(event.getCapacity())
+                .status(event.getStatus().getDescription())
+                .build();
+    }
     
     public Page<SearchEventDTO> filterAndOrderAllEvents(
             SearchEventsRequest request,

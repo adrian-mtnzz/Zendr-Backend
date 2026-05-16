@@ -1,9 +1,6 @@
 package com.zendr.backend.api.controllers;
 
-import com.zendr.backend.internal.event.dtos.CreateEventRequest;
-import com.zendr.backend.internal.event.dtos.EventResponse;
-import com.zendr.backend.internal.event.dtos.SearchEventsRequest;
-import com.zendr.backend.internal.event.dtos.SearchEventDTO;
+import com.zendr.backend.internal.event.dtos.*;
 import com.zendr.backend.services.event.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +31,18 @@ public class EventController {
     }
     
     @PostMapping("/search")
-    public ResponseEntity<Page<SearchEventDTO>> searchOrders(
+    public ResponseEntity<Page<SearchEventDTO>> searchEvents(
             @Valid @RequestBody SearchEventsRequest request,
             Pageable pageable
     ) {
         return ResponseEntity.ok(
                 service.filterAndOrderAllEvents(request, pageable));
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<EventDetailsResponse> getEventDetails(@RequestParam String id) {
+        return ResponseEntity.ok(
+                service.getEventDetails(id)
+        );
     }
 }
