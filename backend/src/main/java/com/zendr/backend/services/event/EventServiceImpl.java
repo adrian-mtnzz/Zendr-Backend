@@ -88,9 +88,11 @@ public class EventServiceImpl implements EventService {
         String eventImgUrl = null;
         try {
             // SUBIR IMAGEN
-            eventImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
-                    ? bucketService.uploadFile(file, "events")
-                    : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg"; // Fallback imagen para eventos
+            if (file != null) {
+                eventImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
+                        ? bucketService.uploadFile(file, "events")
+                        : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg"; // Fallback imagen para eventos
+            } else eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
         }catch (IOException e) {
             eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
         }
