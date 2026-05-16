@@ -26,7 +26,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(
             @RequestBody @Valid RegisterRequest request,
-            @RequestParam MultipartFile file
+            @RequestParam(name = "file", required = false) MultipartFile file
     ) {
         final TokenResponse response = service.register(request, file);
         return ResponseEntity.ok(response);
