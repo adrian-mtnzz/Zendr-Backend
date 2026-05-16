@@ -159,6 +159,8 @@ public class EventServiceImpl implements EventService {
         );
     }
     
+    
+    
     @Transactional
     @PreAuthorize("""
     hasRole('ADMIN') ||
@@ -235,6 +237,12 @@ public class EventServiceImpl implements EventService {
                 .build();
     }
     
+    
+    //public EventDetailsResponse updateEventDetails() {
+    
+    //}
+    
+    
     public Page<SearchEventDTO> filterAndOrderAllEvents(
             SearchEventsRequest request,
             Pageable pageable
@@ -246,6 +254,9 @@ public class EventServiceImpl implements EventService {
         double[] coords = request.coords();
         
         List<Event> events = repository.findAll();
+        events.forEach(e ->
+                System.out.println("EVENT: " + e.getId() + " " + e.getStartsAt())
+        );
         
         events = applyFilters(user, events, request.filters());
         events = applyOrdering(events, request.order(), coords);
