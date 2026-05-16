@@ -391,8 +391,10 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toSet());
         }
         
-        if (user.getDeportiveProfile() != null &&
-                user.getDeportiveProfile().getFavDisciplines() != null) {
+        if (
+                filters.disciplinesNames() == null && user.getDeportiveProfile() != null &&
+                user.getDeportiveProfile().getFavDisciplines() != null && filters.levels() == null &&
+                filters.search() == null && filters.price() == null && filters.isBefore() == null) {
             
             return user.getDeportiveProfile()
                     .getFavDisciplines()
