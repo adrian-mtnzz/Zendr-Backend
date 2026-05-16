@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -39,10 +42,20 @@ public class EventController {
                 service.filterAndOrderAllEvents(request, pageable));
     }
     
+    
     @GetMapping("/{id}")
     public ResponseEntity<EventDetailsResponse> getEventDetails(@PathVariable String id) {
         return ResponseEntity.ok(
                 service.getEventDetails(id)
         );
+    }
+    
+    @PostMapping("/{id}")
+    public ResponseEntity<Map<String, Boolean>> cancelEvent(
+            @PathVariable String eventId) {
+            
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("cancelled", service.cancelEvent(eventId));
+        return ResponseEntity.ok(response);
     }
 }

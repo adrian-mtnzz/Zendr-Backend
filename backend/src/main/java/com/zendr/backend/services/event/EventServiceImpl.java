@@ -2,6 +2,8 @@ package com.zendr.backend.services.event;
 
 
 import com.mongodb.client.model.geojson.GeoJsonObjectType;
+import com.zendr.backend.internal.booking.model.Booking;
+import com.zendr.backend.internal.booking.repository.BookingRepository;
 import com.zendr.backend.internal.discipline.model.Discipline;
 import com.zendr.backend.internal.discipline.repository.DisciplineRepository;
 import com.zendr.backend.internal.event.dtos.*;
@@ -16,6 +18,7 @@ import com.zendr.backend.internal.waitList.model.WaitList;
 import com.zendr.backend.internal.waitList.repository.WaitListRepository;
 import com.zendr.backend.internal.weather.model.Weather;
 import com.zendr.backend.internal.weather.repository.WeatherRepository;
+import com.zendr.backend.services.booking.BookingService;
 import com.zendr.backend.services.geocoding.GeocodingService;
 import com.zendr.backend.services.storage.BucketService;
 import com.zendr.backend.services.weather.WeatherService;
@@ -23,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,9 +48,11 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final WeatherRepository weatherRepository;
     private final WaitListRepository waitListRepository;
+    private final BookingRepository bookingRepository;
     private final GeocodingService geocodingService;
     private final WeatherService weatherService;
     private final BucketService bucketService;
+    
     
     @Transactional
     public EventResponse save(CreateEventRequest request, MultipartFile file) {
@@ -151,6 +157,24 @@ public class EventServiceImpl implements EventService {
                 saved.getCapacity(),
                 Event.EventStatus.ACTIVE.getDescription()
         );
+    }
+    
+    @Transactional
+    @PreAuthorize("@eventRepository.findById(#eventId).get().monitor.id == authentication.principal.id")
+    public boolean cancelEvent(String eventId) {
+        
+        Event event = repository.findById(eventId)
+                .orElseThrow();
+        
+        event.setStatus(Event.EventStatus.CANCELLED);
+        bookingRepository.findByEventId(eventId).forEach(
+                booking -> {
+                    booking.setStatus(Booking.BookingStatus.CANCELED);
+                }
+        );
+        repository.save(event);
+        
+        return true;
     }
     
     public EventDetailsResponse getEventDetails(String eventId) {
