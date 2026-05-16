@@ -81,10 +81,11 @@ public class AuthServiceImpl implements AuthService {
         String profileImgUrl = "";
         try {
             // SUBIR IMAGEN
-            profileImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
-                    ? bucketService.uploadFile(file, "users")
-                    : "users/dbede52b-801a-49ce-8765-535bc02fad1f.png"; // Fallback imagen para eventos
-        
+            if (!(file == null)) {
+                profileImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
+                        ? bucketService.uploadFile(file, "users")
+                        : "users/dbede52b-801a-49ce-8765-535bc02fad1f.png"; // Fallback imagen para eventos
+            }
         } catch (IOException e) {
             profileImgUrl = "users/dbede52b-801a-49ce-8765-535bc02fad1f.png";
         }
