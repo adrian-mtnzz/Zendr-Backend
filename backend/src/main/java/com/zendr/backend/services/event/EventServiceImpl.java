@@ -404,19 +404,6 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toSet());
         }
         
-        if (
-                filters.disciplinesNames() == null && user.getDeportiveProfile() != null &&
-                user.getDeportiveProfile().getFavDisciplines() != null && filters.levels() == null &&
-                filters.search() == null && filters.price() == null && filters.isBefore() == null) {
-            
-            return user.getDeportiveProfile()
-                    .getFavDisciplines()
-                    .stream()
-                    .map(FavDisciplines::getDisciplineId)
-                    .filter(disciplineRepository::existsById)
-                    .collect(Collectors.toSet());
-        }
-        
         return Set.of();
     }
     
