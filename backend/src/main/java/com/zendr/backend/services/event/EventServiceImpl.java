@@ -326,7 +326,8 @@ public class EventServiceImpl implements EventService {
                     if (filters.isBefore() == null) return true;
                     
                     Instant start = Instant.from(e.getStartsAt());
-                    return start.isBefore(filters.isBefore());
+                    Instant filter = Instant.from(filters.isBefore());
+                    return start.isBefore(filter);
                 })
                 
                 // SEARCH
