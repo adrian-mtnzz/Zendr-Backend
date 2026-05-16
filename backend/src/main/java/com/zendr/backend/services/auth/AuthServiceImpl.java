@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Código incorrecto");
         }
         
-        String profileImgUrl = "";
+        String profileImgUrl = "users/dbede52b-801a-49ce-8765-535bc02fad1f.png";
         try {
             // SUBIR IMAGEN
             if (!(file == null)) {
@@ -87,7 +87,6 @@ public class AuthServiceImpl implements AuthService {
                         : "users/dbede52b-801a-49ce-8765-535bc02fad1f.png"; // Fallback imagen para eventos
             }
         } catch (IOException e) {
-            profileImgUrl = "users/dbede52b-801a-49ce-8765-535bc02fad1f.png";
         }
         
         User user = User.builder()
