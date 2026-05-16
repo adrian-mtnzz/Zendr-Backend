@@ -22,6 +22,7 @@ import com.zendr.backend.services.booking.BookingService;
 import com.zendr.backend.services.geocoding.GeocodingService;
 import com.zendr.backend.services.storage.BucketService;
 import com.zendr.backend.services.weather.WeatherService;
+import jakarta.mail.Multipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.*;
 import java.util.*;
@@ -237,11 +239,21 @@ public class EventServiceImpl implements EventService {
                 .build();
     }
     
-    
-    //public EventDetailsResponse updateEventDetails() {
-    
-    //}
-    
+    /*
+    public EventDetailsResponse updateEventDetails(MultipartFile eventImg, String description, BigDecimal price, String id) {
+        if (eventImg != null) try {
+            
+            
+            // SUBIR IMAGEN
+            if (Objects.requireNonNull(eventImg.getContentType()).startsWith("image/")) {
+                String eventImgUrl = bucketService.uploadFile(eventImg, "events");
+            }
+            
+        } catch (IOException e) {
+        
+        }
+    }
+    */
     
     public Page<SearchEventDTO> filterAndOrderAllEvents(
             SearchEventsRequest request,
@@ -268,6 +280,7 @@ public class EventServiceImpl implements EventService {
                             .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
                     
                     return new SearchEventDTO(
+                            event.getId(),
                             weather.getTemperatureInCelsius(),
                             weather.getIconUrl(),
                             distance(
