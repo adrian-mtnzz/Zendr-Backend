@@ -254,9 +254,6 @@ public class EventServiceImpl implements EventService {
         double[] coords = request.coords();
         
         List<Event> events = repository.findAll();
-        events.forEach(e ->
-                System.out.println("EVENT: " + e.getId() + " " + e.getStartsAt())
-        );
         
         events = applyFilters(user, events, request.filters());
         events = applyOrdering(events, request.order(), coords);
@@ -358,11 +355,11 @@ public class EventServiceImpl implements EventService {
                             .allMatch(eventText::contains);
                 })
                 
-                // DISCIPLINAS
-                .filter(e ->
-                        disciplineIds.isEmpty() ||
-                                disciplineIds.contains(e.getDisciplineId())
-                )
+               // // DISCIPLINAS
+               // .filter(e ->
+               //         disciplineIds.isEmpty() ||
+               //                 disciplineIds.contains(e.getDisciplineId())
+               // )
                 
                 // LEVELS
                 .filter(e -> {
