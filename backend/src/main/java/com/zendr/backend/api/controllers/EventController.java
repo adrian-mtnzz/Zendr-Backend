@@ -50,7 +50,7 @@ public class EventController {
         );
     }
     
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/cancel")
     public ResponseEntity<Map<String, Boolean>> cancelEvent(
             @PathVariable String eventId) {
             
