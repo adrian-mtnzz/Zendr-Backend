@@ -18,9 +18,6 @@ public record CreateEventRequest(
     @NotBlank(message = "El nombre del evento no puede estar vacío")
     String name,
     
-    @NotBlank(message = "La imagen del evento no puede estar vacía")
-    MultipartFile eventImgUrl,
-    
     @NotBlank(message = "El nombre común del lugar no puede estar vacío")
     String placeCommonName,
     
