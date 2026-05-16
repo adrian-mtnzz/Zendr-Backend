@@ -2,13 +2,15 @@ package com.zendr.backend.internal.user.model;
 
 import com.zendr.backend.services.storage.BucketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
 public class UserMapper {
 
-    private static BucketService bucketService;
+    private final BucketService bucketService;
     
-    public static UserDTO toDTO(User user) {
+    public UserDTO toDTO(User user) {
         if (user == null) return null;
 
         return new UserDTO(

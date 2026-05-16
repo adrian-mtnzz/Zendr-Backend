@@ -25,7 +25,9 @@ public class UserServiceImpl implements UserService {
     private final DisciplineRepository disciplineRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailAuthCodeService authCodeService;
-
+    private final UserMapper mapper;
+    
+    
     @Override
     public User save(User user) {
         
@@ -56,14 +58,14 @@ public class UserServiceImpl implements UserService {
 
         return repo.findAll()
                 .stream()
-                .map(UserMapper::toDTO)
+                .map(mapper::toDTO)
                 .toList();
     }
 
     @Override
     public Optional<UserDTO> findById(String id) {
 
-        return repo.findById(id).map(UserMapper::toDTO);
+        return repo.findById(id).map(mapper::toDTO);
     }
 
     @Override
@@ -75,13 +77,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserDTO> findByUsername(String username) {
 
-        return repo.findByUsername(username).map(UserMapper::toDTO);
+        return repo.findByUsername(username).map(mapper::toDTO);
     }
 
     @Override
     public Optional<UserDTO> findByEmail(String email) {
 
-        return repo.findByEmail(email).map(UserMapper::toDTO);
+        return repo.findByEmail(email).map(mapper::toDTO);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class UserServiceImpl implements UserService {
 
         return repo.findByRole(role)
                 .stream()
-                .map(UserMapper::toDTO)
+                .map(mapper::toDTO)
                 .toList();
     }
 
@@ -98,7 +100,7 @@ public class UserServiceImpl implements UserService {
 
         return repo.findByDeportiveProfile_FavDisciplines_DisciplineId(disciplineId)
                 .stream()
-                .map(UserMapper::toDTO)
+                .map(mapper::toDTO)
                 .toList();
     }
 
@@ -106,7 +108,7 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDTO> findByQRCode(String qrCode) {
 
         return repo.findByQRCode(qrCode)
-                .map(UserMapper::toDTO);
+                .map(mapper::toDTO);
     }
 
     @Override
@@ -162,7 +164,7 @@ public class UserServiceImpl implements UserService {
             if (dto.getName() != null) user.setName(dto.getName());
             if (dto.getSurname() != null) user.setSurname(dto.getSurname());
             if (dto.getProfileImg() != null) user.setProfileImg(dto.getProfileImg());
-            return UserMapper.toDTO(repo.save(user));
+            return mapper.toDTO(repo.save(user));
         });
     }
 

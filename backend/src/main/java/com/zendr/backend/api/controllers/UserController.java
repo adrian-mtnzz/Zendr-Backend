@@ -22,6 +22,7 @@ import java.util.*;
 public class UserController {
 
     private final UserService service;
+    private final UserMapper mapper;
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody User user) {
@@ -34,7 +35,7 @@ public class UserController {
                 .buildAndExpand(saved.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(UserMapper.toDTO(saved));
+        return ResponseEntity.created(location).body(mapper.toDTO(saved));
     }
 
     @GetMapping()
