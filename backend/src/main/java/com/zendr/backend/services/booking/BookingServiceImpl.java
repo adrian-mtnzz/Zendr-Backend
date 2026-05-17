@@ -85,9 +85,9 @@ public class BookingServiceImpl implements BookingService {
     
     @Transactional
     @PreAuthorize("""
-    @userRepository.findById(
-        @eventRepository.findById(#eventId).get().monitorId
-    ).get().email == authentication.name
+        @userRepository.findById(
+            @bookingRepository.findById(#id).orElse(null)?.userId
+        ).orElse(null).email == authentication.name
     """)
     public Boolean cancel(String eventId, String id) {
         
