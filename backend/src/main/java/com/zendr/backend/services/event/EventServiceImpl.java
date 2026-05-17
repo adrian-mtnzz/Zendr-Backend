@@ -70,13 +70,18 @@ public class EventServiceImpl implements EventService {
                     "La creación de eventos no está permitida para este tipo de usuario, debe ser Monitor o superior");
         }
         
+        if (request.startsAt().isBefore(Instant.now())) {
+            throw new IllegalArgumentException(
+                    "La fecha del evento no puede ser pasada");
+        }
+        
         Discipline discipline = disciplineRepository.findById(request.disciplineId())
                 .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
         
         EventLocation location;
         
         // OBTENER COORDENADAS
-        if (request.longitud() == null && request.latitud() == null) {
+        if (request.longitud() == null || request.latitud() == null) {
             
             location = EventLocation.builder()
                     .coordsType(GeoJsonObjectType.POINT)
@@ -94,7 +99,10 @@ public class EventServiceImpl implements EventService {
                             request.latitud()
                     ))
                     .build();
-                
+        
+        if (location.getCoords() == null) {
+            throw new IllegalArgumentException("No se pudieron obtener coordenadas válidas");
+        }
         
         // CREAR WEATHER
         Weather weather = weatherService.getCurrentWeather(
@@ -109,11 +117,14 @@ public class EventServiceImpl implements EventService {
         
         String eventImgUrl = null;
         try {
+            
             // SUBIR IMAGEN
-            if (file != null) {
-                eventImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
-                        ? bucketService.uploadFile(file, "events")
-                        : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg"; // Fallback imagen para eventos
+            if (
+                    file != null
+                    && file.getContentType() != null
+                    && file.getContentType().startsWith("image/")) {
+                    
+                eventImgUrl =  bucketService.uploadFile(file, "events");
             
             } else eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
         
@@ -186,12 +197,14 @@ public class EventServiceImpl implements EventService {
     public boolean cancelEvent(String eventId) {
         
         Event event = repository.findById(eventId)
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalArgumentException("Evento no encontrado"));
         
         event.setStatus(Event.EventStatus.CANCELLED);
+        
         bookingRepository.findByEventId(eventId).forEach(
                 booking -> {
                     booking.setStatus(Booking.BookingStatus.CANCELED);
+                    bookingRepository.save(booking);
                 }
         );
         repository.save(event);

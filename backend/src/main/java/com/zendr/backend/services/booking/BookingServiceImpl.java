@@ -30,7 +30,7 @@ public class BookingServiceImpl implements BookingService {
     
     
     @PreAuthorize("""
-    @userRepository.findById(#userId).get().email == authentication.name
+    @userRepository.findById(#userId).orElse(null)?.email == authentication.name
     """)
     @Transactional
     public BookingResponse save(String eventId, String userId) {
@@ -45,14 +45,21 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("El usuario esta baneado");
         
         if (event.getStatus() != Event.EventStatus.ACTIVE)
-            throw new IllegalArgumentException("El evento disponible para registrarse");
+            throw new IllegalArgumentException("El evento no está disponible para registrarse");
         
         if (event.getCapacity().isFull())
             throw new IllegalArgumentException("No se puede registrar en el evento porque esta lleno");
         
-        if (repository.findByUserIdAndStatusNot(userId, Booking.BookingStatus.CANCELED_BY_USER) != null) {
-            throw new IllegalArgumentException("Ya existe un reserva para este evento");
+        if (repository.findByUserIdAndEventIdAndStatusNot(
+                userId,
+                eventId,
+                Booking.BookingStatus.CANCELED_BY_USER
+        ).isPresent()) {
+            
+            throw new IllegalArgumentException(
+                    "Ya existe una reserva para este evento");
         }
+        
         
         Booking booking = Booking.builder()
                                 .eventId(eventId)
@@ -76,8 +83,11 @@ public class BookingServiceImpl implements BookingService {
     }
     
     
+    @Transactional
     @PreAuthorize("""
-    @userRepository.findById(#userId).get().email == authentication.name
+    @userRepository.findById(
+        @eventRepository.findById(#eventId).get().monitorId
+    ).get().email == authentication.name
     """)
     public Boolean cancel(String eventId, String id) {
         
@@ -89,15 +99,21 @@ public class BookingServiceImpl implements BookingService {
         
         User user = userRepository.findById(booking.getUserId()).orElseThrow(
                 () -> new IllegalArgumentException("Usuario no encontrado"));
-                
+        
+        if (!booking.getEventId().equals(eventId))
+            throw new IllegalArgumentException("La reserva no pertenece al evento");
+        
+        
         if (booking.getStatus() != Booking.BookingStatus.REGISTERED)
             throw new IllegalArgumentException("No se puede cancelar una reserva que no esta activa");
         
-        int participants = event.getCapacity().getActualBookings() - 1;
+        int participants = Math.max(0, event.getCapacity().getActualBookings() - 1);
+        
         booking.setStatus(Booking.BookingStatus.CANCELED_BY_USER);
         
         event.getCapacity().setActualBookings(participants);
         eventRepository.save(event);
+        repository.save(booking);
         
         if (event.getStartsAt().isBefore(Instant.now().plusSeconds(3600))) {
             userService.applyPenalty(user.getId());
