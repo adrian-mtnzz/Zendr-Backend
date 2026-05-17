@@ -413,31 +413,29 @@ public class EventServiceImpl implements EventService {
                 )
                 // EVENTOS ACTIVOS
                 .filter(e ->
-                        filters != null && filters.userOnly() != null ||
+                        (filters != null &&
+                                filters.userOnly() != null &&
+                                filters.userOnly()) ||
                                 (e.getStartsAt().isAfter(Instant.now())
                                         && e.getStatus() == Event.EventStatus.ACTIVE)
                 )
                 
-                // EVENTOS PROXIMOS
-                .filter(e ->  {
+                // EVENTOS DESPUÉS DE FECHA
+                .filter(e -> {
                     
-                    if (filters == null || filters.isAfter() == null) return true;
-                    
-                    Instant start = Instant.from(e.getStartsAt());
-                    Instant filter = Instant.from(filters.isBefore());
-                    return start.isAfter(filter);
-                    
+                    if (filters == null || filters.isAfter() == null) {
+                        return true;
+                    }
+                    return e.getStartsAt().isAfter(filters.isAfter());
                 })
                 
-                // EVENTOS PASADOS
-                .filter(e ->  {
+                // EVENTOS ANTES DE FECHA
+                .filter(e -> {
                     
-                    if (filters == null || filters.isBefore() == null) return true;
-                    
-                    Instant start = Instant.from(e.getStartsAt());
-                    Instant filter = Instant.from(filters.isBefore());
-                    
-                    return start.isBefore(filter);
+                    if (filters == null || filters.isBefore() == null) {
+                        return true;
+                    }
+                    return e.getStartsAt().isBefore(filters.isBefore());
                 })
                 
                 // PRECIO (<=)
