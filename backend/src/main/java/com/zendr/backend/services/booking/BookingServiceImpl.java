@@ -90,8 +90,14 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findById(booking.getUserId()).orElseThrow(
                 () -> new IllegalArgumentException("Usuario no encontrado"));
                 
+        if (booking.getStatus() != Booking.BookingStatus.REGISTERED)
+            throw new IllegalArgumentException("No se puede cancelar una reserva que no esta activa");
         
+        int participants = event.getCapacity().getActualBookings() - 1;
         booking.setStatus(Booking.BookingStatus.CANCELED_BY_USER);
+        
+        event.getCapacity().setActualBookings(participants);
+        eventRepository.save(event);
         
         if (event.getStartsAt().isBefore(Instant.now().plusSeconds(3600))) {
             userService.applyPenalty(user.getId());

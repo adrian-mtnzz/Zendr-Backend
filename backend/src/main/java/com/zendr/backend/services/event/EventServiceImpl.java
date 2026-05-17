@@ -392,6 +392,12 @@ public class EventServiceImpl implements EventService {
                             .findById(event.getDisciplineId())
                             .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
                     
+                    if (event.getStartsAt().isBefore(Instant.now()) && !(event.getStatus() == Event.EventStatus.CANCELLED))
+                        event.setStatus(Event.EventStatus.ONGOING);
+                    
+                    if (event.getEndsAt().isBefore(Instant.now())  && !(event.getStatus() == Event.EventStatus.CANCELLED))
+                        event.setStatus(Event.EventStatus.ENDED);
+                    
                     return new SearchEventDTO(
                             event.getId(),
                             weather.getTemperatureInCelsius(),

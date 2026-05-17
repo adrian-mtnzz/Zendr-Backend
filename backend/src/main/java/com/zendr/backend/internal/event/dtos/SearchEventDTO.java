@@ -22,5 +22,5 @@ public record SearchEventDTO(
         String bookingStatus,
         String bookingId
         
-){
+) {
 }
