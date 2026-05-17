@@ -76,7 +76,7 @@ public class EventServiceImpl implements EventService {
         EventLocation location;
         
         // OBTENER COORDENADAS
-        if (request.longitud() != null && request.latitud() != null) {
+        if (request.longitud() == null && request.latitud() == null) {
             
             location = EventLocation.builder()
                     .coordsType(GeoJsonObjectType.POINT)
@@ -114,11 +114,10 @@ public class EventServiceImpl implements EventService {
                 eventImgUrl = Objects.requireNonNull(file.getContentType()).startsWith("image/")
                         ? bucketService.uploadFile(file, "events")
                         : "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg"; // Fallback imagen para eventos
+            
             } else eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
         
         } catch (IOException e) {
-        
-        } finally {
             eventImgUrl = "events/b4301c46-9318-4820-a491-f98eebda7f8b.jpeg";
         }
         
@@ -398,6 +397,21 @@ public class EventServiceImpl implements EventService {
                     if (event.getEndsAt().isBefore(Instant.now())  && !(event.getStatus() == Event.EventStatus.CANCELLED))
                         event.setStatus(Event.EventStatus.ENDED);
                     
+                    Optional<Booking> booking =
+                            bookingRepository.findByUserIdAndEventIdAndStatusNot(
+                                    user.getId(),
+                                    event.getId(),
+                                    Booking.BookingStatus.CANCELED
+                            );
+                    
+                    String bookingStatus = booking
+                            .map(b -> b.getStatus().getDescription())
+                            .orElse(null);
+                    
+                    String bookingId = booking
+                            .map(Booking::getId)
+                            .orElse(null);
+                    
                     return new SearchEventDTO(
                             event.getId(),
                             weather.getTemperatureInCelsius(),
@@ -417,8 +431,8 @@ public class EventServiceImpl implements EventService {
                             event.getPriceDetails().getPrice(),
                             event.getPriceDetails().getCurrency().getSymbol(),
                             bookingRepository.existsByUserIdAndStatus(user.getId(), Booking.BookingStatus.REGISTERED),
-                            bookingRepository.findByUserIdAndStatusNot(user.getId(), Booking.BookingStatus.CANCELED).getStatus().getDescription(),
-                            bookingRepository.findByUserIdAndStatusNot(user.getId(), Booking.BookingStatus.CANCELED).getId()
+                            bookingStatus,
+                            bookingId
                             
                     );
                 })
