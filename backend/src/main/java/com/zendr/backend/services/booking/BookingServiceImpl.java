@@ -10,6 +10,7 @@ import com.zendr.backend.internal.user.repository.UserRepository;
 import com.zendr.backend.services.event.EventService;
 import com.zendr.backend.services.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +23,15 @@ import java.util.concurrent.TimeUnit;
 public class BookingServiceImpl implements BookingService {
     
     private final EventRepository eventRepository;
-    private final EventService eventService;
     private final UserRepository userRepository;
     private final UserService userService;
     private final BookingRepository repository;
     
     
+    
+    @PreAuthorize("""
+    @userRepository.findById(#userId).get().email == authentication.name
+    """)
     @Transactional
     public BookingResponse save(String eventId, String userId) {
         
@@ -65,6 +69,9 @@ public class BookingServiceImpl implements BookingService {
     }
     
     
+    @PreAuthorize("""
+    @userRepository.findById(#userId).get().email == authentication.name
+    """)
     public Boolean cancel(String eventId, String id) {
         
         Event event = eventRepository.findById(eventId).orElseThrow(
