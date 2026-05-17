@@ -364,7 +364,6 @@ public class EventServiceImpl implements EventService {
                 .priceDetails(event.getPriceDetails())
                 .capacity(event.getCapacity())
                 .status(event.getStatus().getDescription())
-                .isReserved(true)
                 .build();
     }
     
