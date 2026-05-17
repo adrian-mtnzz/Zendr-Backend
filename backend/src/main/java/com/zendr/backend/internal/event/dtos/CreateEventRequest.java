@@ -59,7 +59,11 @@ public record CreateEventRequest(
     EventPriceDetails priceDetails,
     
     @Valid
-    EventCapacity capacity
+    EventCapacity capacity,
+    
+    Double longitud,
+    
+    Double latitud
 ) {
 
 }

@@ -73,16 +73,28 @@ public class EventServiceImpl implements EventService {
         Discipline discipline = disciplineRepository.findById(request.disciplineId())
                 .orElseThrow(() -> new IllegalArgumentException("Disciplina no encontrada"));
         
+        EventLocation location;
         
         // OBTENER COORDENADAS
-        EventLocation location = EventLocation.builder()
-                .coordsType(GeoJsonObjectType.POINT)
-                .coords(geocodingService.getCoordinates(
-                        request.address(),
-                        request.city(),
-                        request.region(),
-                        request.country()))
-                .build();
+        if (request.longitud() != null && request.latitud() != null) {
+            
+            location = EventLocation.builder()
+                    .coordsType(GeoJsonObjectType.POINT)
+                    .coords(geocodingService.getCoordinates(
+                            request.address(),
+                            request.city(),
+                            request.region(),
+                            request.country()))
+                    .build();
+            
+        } else location = EventLocation.builder()
+                    .coordsType(GeoJsonObjectType.POINT)
+                    .coords(new EventLocation.Coordinates(
+                            request.longitud(),
+                            request.latitud()
+                    ))
+                    .build();
+                
         
         // CREAR WEATHER
         Weather weather = weatherService.getCurrentWeather(
