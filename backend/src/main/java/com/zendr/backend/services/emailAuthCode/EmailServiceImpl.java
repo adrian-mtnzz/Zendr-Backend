@@ -1,3 +1,5 @@
+package com.zendr.backend.services.emailAuthCode;
+
 import com.zendr.backend.services.emailAuthCode.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
