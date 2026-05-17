@@ -35,6 +35,7 @@ public class StorageController {
         
     }
     
+    
     @PostMapping("/upload/event-image")
     public ResponseEntity<Map<String, String>> uploadEventImage(@RequestParam("file") MultipartFile file) {
         
@@ -49,6 +50,7 @@ public class StorageController {
             return ResponseEntity.noContent().build();
         }
     }
+    
     
     @GetMapping("/get-resource")
     public ResponseEntity<Map<String, String>> getSignedUrl(
