@@ -430,7 +430,11 @@ public class EventServiceImpl implements EventService {
                             event.getStartsAt(),
                             event.getPriceDetails().getPrice(),
                             event.getPriceDetails().getCurrency().getSymbol(),
-                            bookingRepository.existsByUserIdAndStatus(user.getId(), Booking.BookingStatus.REGISTERED),
+                            bookingRepository.existsByUserIdAndEventIdAndStatus(
+                                    user.getId(),
+                                    event.getId(),
+                                    Booking.BookingStatus.REGISTERED
+                            ),
                             bookingStatus,
                             bookingId
                             

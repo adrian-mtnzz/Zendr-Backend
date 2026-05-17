@@ -17,6 +17,6 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     Optional<Booking> findByUserIdAndEventIdAndStatusNot(
             String userId, String eventId, Booking.BookingStatus status
     );
-    
+    Boolean existsByUserIdAndEventIdAndStatus(String userId, String eventId, Booking.BookingStatus status);
     Boolean existsByUserIdAndStatus(String userId, Booking.BookingStatus status);
 }
