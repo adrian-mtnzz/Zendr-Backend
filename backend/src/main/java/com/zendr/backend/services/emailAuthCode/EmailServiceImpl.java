@@ -66,6 +66,9 @@ public class EmailServiceImpl implements EmailService {
                          .container {
                              width: 100%% !important;
                              max-width: 100%% !important;
+                             display: flex;
+                             align-items: center;
+                             justify-content: center;
                          }
     
                          .card {
