@@ -55,9 +55,9 @@ public class StorageController {
             @RequestParam String key
     ) {
         
-        String url = storageService.generatePresignedUrl(key);
+
         return ResponseEntity.ok(Map.of(
-                "url", url
+                "url", storageService.generatePresignedUrl(key)
         ));
     }
 }
