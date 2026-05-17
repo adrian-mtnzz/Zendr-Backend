@@ -200,12 +200,41 @@ public class EventServiceImpl implements EventService {
         return true;
     }
     
-    public EventDetailsResponse getEventDetails(String eventId) {
+    
+    
+    public EventDetailsResponse getEventDetails(String eventId, String userId) {
         
         Event event = repository.findById(eventId).orElseThrow(
                 () -> new IllegalArgumentException("Evento no encontrado")
         );
         
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("No se ha encontrado el usuario"));
+        
+        boolean isReserved = bookingRepository.existsByUserIdAndStatus(userId, Booking.BookingStatus.REGISTERED);
+        
+        
+        List<Booking> bookings = bookingRepository
+                .findByUserId(userId);
+        
+        
+        String bookingStatus;
+        String bookingId;
+        
+        if (bookings == null || bookings.isEmpty()) {
+            bookingStatus = null;
+            bookingId = null;
+            
+        } else {
+            Booking booking = bookings.stream()
+                    .filter(b -> b.getStatus() != Booking.BookingStatus.CANCELED_BY_USER)
+                    .findFirst()
+                    .orElse(null);
+            
+            bookingStatus = booking != null? booking.getStatus().getDescription(): null;
+            bookingId = booking != null? booking.getId(): null;
+        }
+    
         EventLocation.Coordinates coords = event.getLocation().getCoords();
         Weather oldWeather = weatherRepository.findById(event.getWeatherId()).orElseThrow(
                 ()-> new IllegalArgumentException("No se ha encontrado el tiempo para este evento")
@@ -250,6 +279,9 @@ public class EventServiceImpl implements EventService {
                 .priceDetails(event.getPriceDetails())
                 .capacity(event.getCapacity())
                 .status(event.getStatus().getDescription())
+                .isReserved(isReserved)
+                .bookingStatus(bookingStatus)
+                .bookingId(bookingId)
                 .build();
     }
     
@@ -332,6 +364,7 @@ public class EventServiceImpl implements EventService {
                 .priceDetails(event.getPriceDetails())
                 .capacity(event.getCapacity())
                 .status(event.getStatus().getDescription())
+                .isReserved(true)
                 .build();
     }
     
@@ -377,7 +410,11 @@ public class EventServiceImpl implements EventService {
                             event.getLevel().getDescription(),
                             event.getStartsAt(),
                             event.getPriceDetails().getPrice(),
-                            event.getPriceDetails().getCurrency().getSymbol()
+                            event.getPriceDetails().getCurrency().getSymbol(),
+                            bookingRepository.existsByUserIdAndStatus(user.getId(), Booking.BookingStatus.REGISTERED),
+                            bookingRepository.findByUserIdAndStatusNot(user.getId(), Booking.BookingStatus.CANCELED).getStatus().getDescription(),
+                            bookingRepository.findByUserIdAndStatusNot(user.getId(), Booking.BookingStatus.CANCELED).getId()
+                            
                     );
                 })
                 .toList();

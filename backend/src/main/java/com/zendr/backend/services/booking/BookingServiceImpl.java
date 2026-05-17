@@ -41,11 +41,18 @@ public class BookingServiceImpl implements BookingService {
         if (!userRepository.existsById(userId))
             throw new IllegalArgumentException("Usuario no encontrado");
         
-        if (userService.getPenalties(userId).get().getBan().isBanned())
+        if (userService.getPenalties(userId).isPresent() && userService.getPenalties(userId).get().getBan().isBanned())
             throw new IllegalArgumentException("El usuario esta baneado");
+        
+        if (event.getStatus() != Event.EventStatus.ACTIVE)
+            throw new IllegalArgumentException("El evento disponible para registrarse");
         
         if (event.getCapacity().isFull())
             throw new IllegalArgumentException("No se puede registrar en el evento porque esta lleno");
+        
+        if (repository.findByUserIdAndStatusNot(userId, Booking.BookingStatus.CANCELED_BY_USER) != null) {
+            throw new IllegalArgumentException("Ya existe un reserva para este evento");
+        }
         
         Booking booking = Booking.builder()
                                 .eventId(eventId)

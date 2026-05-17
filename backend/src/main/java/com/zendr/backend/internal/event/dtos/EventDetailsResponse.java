@@ -34,6 +34,9 @@ public record EventDetailsResponse(
         EventLocation location,
         EventPriceDetails priceDetails,
         EventCapacity capacity,
-        String status
+        String status,
+        boolean isReserved,
+        String bookingStatus,
+        String bookingId
 ) {
 }

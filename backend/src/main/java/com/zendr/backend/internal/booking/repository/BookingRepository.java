@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends MongoRepository<Booking, String> {
     List<Booking> findByEventId(String eventId);
+    List<Booking> findByUserId(String userId);
+    Booking findByUserIdAndStatus(String userId, Booking.BookingStatus status);
+    Booking findByUserIdAndStatusNot(String userId, Booking.BookingStatus status);
+    Boolean existsByUserIdAndStatus(String userId, Booking.BookingStatus status);
 }

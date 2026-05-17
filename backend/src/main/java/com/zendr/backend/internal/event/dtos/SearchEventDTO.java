@@ -17,7 +17,10 @@ public record SearchEventDTO(
         String disciplineLevel,
         Instant date,
         BigDecimal price,
-        String currencySymbol
+        String currencySymbol,
+        boolean isReserved,
+        String bookingStatus,
+        String bookingId
         
 ){
 }

@@ -9,6 +9,6 @@ public interface EventService {
     EventResponse save(CreateEventRequest request, MultipartFile file);
     EventDetailsResponse update(String id, UpdateEventRequest request, MultipartFile file);
     Page<SearchEventDTO> filterAndOrderAllEvents(SearchEventsRequest request, Pageable pageable);
-    EventDetailsResponse getEventDetails(String eventId);
+    EventDetailsResponse getEventDetails(String eventId, String userId);
     public boolean cancelEvent(String eventId);
 }

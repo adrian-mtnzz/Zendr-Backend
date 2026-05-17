@@ -68,9 +68,12 @@ public class EventController {
     
     
     @GetMapping("/{id}")
-    public ResponseEntity<EventDetailsResponse> getEventDetails(@PathVariable String id) {
+    public ResponseEntity<EventDetailsResponse> getEventDetails(
+            @PathVariable String id,
+            @RequestParam String userId
+    ) {
         return ResponseEntity.ok(
-                service.getEventDetails(id)
+                service.getEventDetails(id, userId)
         );
     }
     
