@@ -35,13 +35,12 @@ public class StorageController {
         
     }
     
-    
     @PostMapping("/upload/event-image")
     public ResponseEntity<Map<String, String>> uploadEventImage(@RequestParam("file") MultipartFile file) {
         
         try {
             Map<String, String> response = new HashMap<>();
-            String url =  storageService.uploadFile(file, "events");
+            String url =  storageService.generatePresignedUrl(storageService.uploadFile(file, "events"));
             response.put("url", url);
             
             return ResponseEntity.ok(response);
@@ -50,7 +49,6 @@ public class StorageController {
             return ResponseEntity.noContent().build();
         }
     }
-    
     
     @GetMapping("/get-resource")
     public ResponseEntity<Map<String, String>> getSignedUrl(

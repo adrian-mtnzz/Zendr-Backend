@@ -1,6 +1,7 @@
 package com.zendr.backend.services.emailAuthCode;
 
 import com.zendr.backend.services.emailAuthCode.EmailService;
+import com.zendr.backend.services.storage.BucketService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ public class EmailServiceImpl implements EmailService {
     
     @Value("${spring.mail.username}")
     private String from;
+    private final BucketService bucketService;
+    
     
     @Override
     public void sendAuthCode(String to, String code) {
@@ -36,6 +39,10 @@ public class EmailServiceImpl implements EmailService {
             helper.setFrom(from);
             helper.setTo(to);
             helper.setSubject("Código de verificación");
+            
+            String logoUrl = bucketService.generatePresignedUrl("events/7f5a310a-1b37-4d99-9d93-89dc85cc525a.png");
+            
+            
             
             String html = """
              <!doctype html>
@@ -108,8 +115,7 @@ public class EmailServiceImpl implements EmailService {
                                  <tr>
                                      <td align="center" style="padding: 0 0 22px;">
                                          <div style="font-size: 34px; line-height: 1; font-weight: 800; color: #0E1116;">
-                                             <span style="color: #3FC6CA;">Zen</span>
-                                             <span style="color: #4F8DE7;">dr</span>
+                                             <img src="%s" style="width: 100%%; max-width: 300px">
                                          </div>
                                      </td>
                                  </tr>
@@ -264,7 +270,7 @@ public class EmailServiceImpl implements EmailService {
     
              </body>
              </html>
-        """.formatted(code);
+        """.formatted(logoUrl, code);
             
             helper.setText(html, true);
             
