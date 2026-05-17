@@ -40,7 +40,7 @@ public class StorageController {
         
         try {
             Map<String, String> response = new HashMap<>();
-            String url =  storageService.generatePresignedUrl(storageService.uploadFile(file, "events"));
+            String url =  storageService.generatePresignedUrl(storageService.uploadFile(file, "icons"));
             response.put("url", url);
             
             return ResponseEntity.ok(response);
