@@ -40,7 +40,7 @@ public class StorageController {
         
         try {
             Map<String, String> response = new HashMap<>();
-            String url =  storageService.generatePresignedUrl(storageService.uploadFile(file, "icons"));
+            String url =  storageService.uploadFile(file, "events");
             response.put("url", url);
             
             return ResponseEntity.ok(response);
@@ -55,9 +55,9 @@ public class StorageController {
             @RequestParam String key
     ) {
         
-
+        String url = storageService.generatePresignedUrl(key);
         return ResponseEntity.ok(Map.of(
-                "url", storageService.generatePresignedUrl(key)
+                "url", url
         ));
     }
 }
