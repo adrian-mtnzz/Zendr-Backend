@@ -11,9 +11,8 @@ public record SearchFilters(
         List<String> levels,
         Instant isBefore,
         Instant isAfter,
-        String search,
-        String userId
-
+        Boolean userOnly,
+        String search
 ) {
     public static SearchFilters defaultOrder() {
         
@@ -24,6 +23,7 @@ public record SearchFilters(
                 null,
                 null,
                 null,
-                null);
+                null
+        );
     }
 }

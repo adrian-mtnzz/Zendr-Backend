@@ -404,16 +404,16 @@ public class EventServiceImpl implements EventService {
                 // EVENTOS DE UN USUARIO INCLUYE CANCELADOS POR MONITOR
                 .filter(e ->
                         filters == null ||
-                                filters.userId() == null ||
+                                filters.userOnly() == null ||
                                 bookingRepository.findByEventId(e.getId())
                                         .stream()
                                         .anyMatch(booking ->
-                                                booking.getUserId().equals(filters.userId())
+                                                booking.getUserId().equals(user.getId())
                                         )
                 )
                 // EVENTOS ACTIVOS
                 .filter(e ->
-                        filters != null && filters.userId() != null ||
+                        filters != null && filters.userOnly() != null ||
                                 (e.getStartsAt().isAfter(Instant.now())
                                         && e.getStatus() == Event.EventStatus.ACTIVE)
                 )
