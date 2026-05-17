@@ -411,14 +411,30 @@ public class EventServiceImpl implements EventService {
                                                 booking.getUserId().equals(user.getId())
                                         )
                 )
-                // EVENTOS ACTIVOS
+                
+                // OCULTAR EVENTOS CANCELADOS POR EL USUARIO
+                .filter(e ->
+                        filters == null ||
+                                filters.userOnly() == null ||
+                                !filters.userOnly() ||
+                                bookingRepository.findByEventId(e.getId())
+                                        .stream()
+                                        .noneMatch(booking ->
+                                                booking.getUserId().equals(user.getId())
+                                                        &&
+                                                        booking.getStatus() == Booking.BookingStatus.CANCELED_BY_USER
+                                        )
+                )
+                
+                // EVENTOS ACTIVOS EN LISTADO GENERAL
                 .filter(e ->
                         (filters != null &&
                                 filters.userOnly() != null &&
                                 filters.userOnly()) ||
                                 (e.getStartsAt().isAfter(Instant.now())
-                                        && e.getStatus() == Event.EventStatus.ACTIVE)
+                                        && (e.getStatus() == Event.EventStatus.ACTIVE))
                 )
+                
                 
                 // EVENTOS DESPUÉS DE FECHA
                 .filter(e -> {
