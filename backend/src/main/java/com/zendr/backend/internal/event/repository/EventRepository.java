@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends MongoRepository<Event, String> {
-    
+    List<Event> findByMonitorIdAndStatus(String monitorId, Event.EventStatus status);
+    List<Event> findByMonitorId(String monitorId);
 }

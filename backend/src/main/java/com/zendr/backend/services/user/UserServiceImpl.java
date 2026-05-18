@@ -1,11 +1,14 @@
 package com.zendr.backend.services.user;
 
 import com.zendr.backend.internal.discipline.repository.DisciplineRepository;
+import com.zendr.backend.internal.event.model.Event;
+import com.zendr.backend.internal.event.repository.EventRepository;
 import com.zendr.backend.internal.user.model.*;
 import com.zendr.backend.internal.user.model.enums.SubscriptionStatus;
 import com.zendr.backend.internal.user.model.enums.UserRole;
 import com.zendr.backend.internal.user.repository.UserRepository;
 import com.zendr.backend.services.emailAuthCode.EmailAuthCodeService;
+import com.zendr.backend.services.event.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,8 @@ public class UserServiceImpl implements UserService {
     private final DisciplineRepository disciplineRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailAuthCodeService authCodeService;
+    private final EventRepository eventRepository;
+    private final EventService eventService;
     private final UserMapper mapper;
     
     
@@ -328,11 +333,32 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+  
     @Override
+    @Transactional
     public void deleteById(String id) {
-        if (!repo.existsById(id)) {
-            throw new RuntimeException("No se puede eliminar: Usuario no encontrado con ID: " + id);
+        
+        // Obtener el usuario para verificar su rol
+        User user = repo.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Usuario no encontrado") );
+        
+        // Si es MONITOR, cancelar todos sus eventos activos
+        if (user.getRole() == UserRole.MONITOR) {
+            List<Event> activeEvents = eventRepository.findByMonitorIdAndStatus(
+                    id,
+                    Event.EventStatus.ACTIVE
+            );
+            
+            // Cancelar cada evento activo
+            for (Event event : activeEvents) {
+                try {
+                    eventService.cancelEvent(event.getId());
+                } catch (Exception e) {
+                }
+            }
         }
+        
+        // Eliminar el usuario
         repo.deleteById(id);
     }
 
