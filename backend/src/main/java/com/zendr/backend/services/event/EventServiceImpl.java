@@ -70,9 +70,9 @@ public class EventServiceImpl implements EventService {
                     "La creación de eventos no está permitida para este tipo de usuario, debe ser Monitor o superior");
         }
         
-        if (request.startsAt().isBefore(Instant.now())) {
+        if (request.startsAt().isBefore(Instant.now().plusSeconds(3600))) {
             throw new IllegalArgumentException(
-                    "La fecha del evento no puede ser pasada");
+                    "La fecha del evento no puede ser anterior al momento actual");
         }
         
         Discipline discipline = disciplineRepository.findById(request.disciplineId())
@@ -191,8 +191,8 @@ public class EventServiceImpl implements EventService {
     @PreAuthorize("""
     hasRole('ADMIN') ||
     @userRepository.findById(
-        @eventRepository.findById(#eventId).get().monitorId
-    ).get().email == authentication.name
+        @eventRepository.findById(#eventId).orElse(null)?.monitorId
+    ).orElse(null)?.email == authentication.name
     """)
     public boolean cancelEvent(String eventId) {
         
@@ -303,8 +303,8 @@ public class EventServiceImpl implements EventService {
     @PreAuthorize("""
     hasRole('ADMIN') ||
     @userRepository.findById(
-        @eventRepository.findById(#eventId).get().monitorId
-    ).get().email == authentication.name
+        @eventRepository.findById(#eventId).orElse(null)?.monitorId
+    ).orElse(null)?.email == authentication.name
     """)
     public EventDetailsResponse update(String id, UpdateEventRequest request, MultipartFile file) {
         
@@ -726,7 +726,7 @@ public class EventServiceImpl implements EventService {
             double lat1, double lon1,
             double lat2, double lon2
     ) {
-        double R = 6371000; // km
+        double R = 6371000; // metros
         
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
