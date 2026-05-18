@@ -76,26 +76,39 @@ public class UserController {
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-
+    
+    
     @GetMapping("/filterAll")
     public ResponseEntity<List<UserDTO>> getUsersByDisciplineId(
             @RequestParam(required = false) String disciplineId,
             @RequestParam(required = false) String role) {
-
-        List<UserDTO> users = null;
+        
+        
+        if ((disciplineId == null || disciplineId.isEmpty()) &&
+                (role == null || role.isEmpty())) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        List<UserDTO> users = new ArrayList<>();
+        
         if (disciplineId != null && !disciplineId.isEmpty()) {
-            users = service.findByDisciplineId(disciplineId);
+            users.addAll(service.findByDisciplineId(disciplineId));
         }
-
+        
         if (role != null && !role.isEmpty()) {
-            users = service.findByRole(UserRole.valueOf(role));
+            List<UserDTO> roleUsers = service.findByRole(UserRole.valueOf(role));
+            if (users.isEmpty()) {
+                users = roleUsers;
+            } else {
+                // Si ambos parámetros, hacer intersección
+                users.retainAll(roleUsers);
+            }
         }
-
-        if (Objects.requireNonNull(users).isEmpty()) {
+        
+        if (users.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
+        
         return ResponseEntity.ok(users);
     }
 

@@ -386,7 +386,7 @@ public class EventServiceImpl implements EventService {
     ) {
         
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         
         double[] coords = request.coords();
         
