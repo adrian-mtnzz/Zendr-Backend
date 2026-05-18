@@ -18,6 +18,7 @@ public interface BookingRepository extends MongoRepository<Booking, String> {
     Optional<Booking> findByUserIdAndEventIdAndStatusNotAndDeletedAtNull(
             String userId, String eventId, Booking.BookingStatus status
     );
+    List<Booking>findByUserIdAndEventIdAndDeletedAtNull(String userId, String eventId);
     Optional<Booking> findByUserIdAndEventIdAndStatusNot(
             String userId, String eventId, Booking.BookingStatus status
     );

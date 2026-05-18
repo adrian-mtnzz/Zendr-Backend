@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.TemporalUnit;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -50,16 +51,15 @@ public class BookingServiceImpl implements BookingService {
         if (event.getCapacity().isFull())
             throw new IllegalArgumentException("No se puede registrar en el evento porque esta lleno");
         
-        if (repository.findByUserIdAndEventIdAndStatusNotAndDeletedAtNull(
-                userId,
-                eventId,
+        List<Booking.BookingStatus> allowedToRebookStatuses = List.of(
                 Booking.BookingStatus.CANCELED_BY_USER
-        ).isPresent()) {
-            
-            throw new IllegalArgumentException(
-                    "Ya existe una reserva para este evento");
-        }
+        );
         
+        if (repository.findByUserIdAndEventIdAndDeletedAtNull(userId, eventId)
+                .stream()
+                .anyMatch(b -> !allowedToRebookStatuses.contains(b.getStatus()))) {
+            throw new IllegalArgumentException("Ya existe una reserva activa para este evento");
+        }
         
         Booking booking = Booking.builder()
                                 .eventId(eventId)
