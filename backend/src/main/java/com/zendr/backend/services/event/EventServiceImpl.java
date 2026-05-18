@@ -21,7 +21,10 @@ import com.zendr.backend.services.geocoding.GeocodingService;
 import com.zendr.backend.services.storage.BucketService;
 import com.zendr.backend.services.weather.WeatherService;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +44,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventServiceImpl.class);
     
     private final EventRepository repository;
     private final DisciplineRepository disciplineRepository;
@@ -51,8 +56,26 @@ public class EventServiceImpl implements EventService {
     private final GeocodingService geocodingService;
     private final WeatherService weatherService;
     private final BucketService bucketService;
-    
-    
+
+
+    @PostConstruct
+    public void cleanupOrphanedBookings() {
+        List<String> validUserIds = userRepository.findAll().stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+
+        List<Booking> allBookings = bookingRepository.findAll();
+        List<Booking> orphanedBookings = allBookings.stream()
+                .filter(b -> !validUserIds.contains(b.getUserId()))
+                .collect(Collectors.toList());
+
+        if (!orphanedBookings.isEmpty()) {
+            bookingRepository.deleteAll(orphanedBookings);
+            logger.info("Deleted {} orphaned booking(s) referencing non-existent users", orphanedBookings.size());
+        }
+    }
+
+
     @Transactional
     @PreAuthorize("""
     hasRole('MONITOR') ||
@@ -386,7 +409,12 @@ public class EventServiceImpl implements EventService {
     ) {
         
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Usuario con ID '" + request.userId() + "' no encontrado. " +
+                        "Usuarios válidos: " + userRepository.findAll().stream()
+                                .map(User::getId)
+                                .collect(Collectors.joining(", "))
+                ));
         
         double[] coords = request.coords();
         
