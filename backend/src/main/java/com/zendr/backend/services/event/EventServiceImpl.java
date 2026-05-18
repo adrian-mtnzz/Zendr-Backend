@@ -385,8 +385,21 @@ public class EventServiceImpl implements EventService {
             Pageable pageable
     ) {
         
+        // Validar que userId no sea null o vacío
+        if (request.userId() == null || request.userId().trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID del usuario es requerido");
+        }
+        
+        // Verificar que exista
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    List<String> validUserIds = userRepository.findAll().stream()
+                            .map(User::getId)
+                            .toList();
+                    
+                    return new IllegalArgumentException(
+                            "Usuario con ID '" + request.userId() + "' no encontrado. ");
+                });
         
         double[] coords = request.coords();
         
