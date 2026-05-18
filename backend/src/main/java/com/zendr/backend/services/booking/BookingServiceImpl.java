@@ -50,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
         if (event.getCapacity().isFull())
             throw new IllegalArgumentException("No se puede registrar en el evento porque esta lleno");
         
-        if (repository.findByUserIdAndEventIdAndStatusNot(
+        if (repository.findByUserIdAndEventIdAndStatusNotAndDeletedAtNull(
                 userId,
                 eventId,
                 Booking.BookingStatus.CANCELED_BY_USER
@@ -110,6 +110,7 @@ public class BookingServiceImpl implements BookingService {
         int participants = Math.max(0, event.getCapacity().getActualBookings() - 1);
         
         booking.setStatus(Booking.BookingStatus.CANCELED_BY_USER);
+        booking.setDeletedAt(Instant.now());
         
         event.getCapacity().setActualBookings(participants);
         eventRepository.save(event);

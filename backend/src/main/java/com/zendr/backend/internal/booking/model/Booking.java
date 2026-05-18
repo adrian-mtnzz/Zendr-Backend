@@ -8,6 +8,8 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -30,6 +32,8 @@ public class Booking {
     
     @Valid
     private BookingPaymentDetails payment;
+
+    private Instant deletedAt;
     
     @Getter
     @RequiredArgsConstructor
