@@ -410,12 +410,11 @@ public class EventServiceImpl implements EventService {
                     if (event.getEndsAt().isBefore(Instant.now())  && !(event.getStatus() == Event.EventStatus.CANCELLED))
                         event.setStatus(Event.EventStatus.ENDED);
                     
-                    Optional<Booking> booking =
-                            bookingRepository.findByUserIdAndEventIdAndStatusNot(
-                                    user.getId(),
-                                    event.getId(),
-                                    Booking.BookingStatus.CANCELED
-                            );
+                    Optional<Booking> booking = bookingRepository.findByUserIdAndEventIdAndStatusNotAndDeletedAtNull(
+                            user.getId(),
+                            event.getId(),
+                            Booking.BookingStatus.CANCELED
+                    );
                     
                     String bookingStatus = booking
                             .map(b -> b.getStatus().getDescription())
