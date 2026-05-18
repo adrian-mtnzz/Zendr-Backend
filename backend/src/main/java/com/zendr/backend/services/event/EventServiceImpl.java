@@ -362,7 +362,8 @@ public class EventServiceImpl implements EventService {
                 .monitorName(
                         userRepository
                             .findById(event.getMonitorId())
-                            .get().getName()
+                            .orElseThrow(() -> new IllegalArgumentException("No se ha encontrado el id del monitor"))
+                                .getName()
                 )
                 .disciplineId(event.getDisciplineId())
                 .level(event.getLevel().getDescription())
@@ -371,7 +372,8 @@ public class EventServiceImpl implements EventService {
                 .duration(event.getDuration())
                 .weather(
                         weatherRepository
-                                .findById(event.getWeatherId()).get())
+                                .findById(event.getWeatherId()).orElseThrow(() ->
+                                        new IllegalArgumentException("No se ha encontrado clima para este evento")))
                 .location(event.getLocation())
                 .priceDetails(event.getPriceDetails())
                 .capacity(event.getCapacity())
