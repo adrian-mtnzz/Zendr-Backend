@@ -6,11 +6,6 @@ spring:
     ansi:
       enabled: always
 
-  mongodb:
-    uri: ${ZENDR_DB_URI}
-    database: "test_db"
-    auto-index-creation: true
-
   mail:
     host: ${ZENDR_SMTP_HOST}
     port: ${ZENDR_SMTP_PORT}
