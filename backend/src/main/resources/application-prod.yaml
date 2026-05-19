@@ -1,5 +1,5 @@
 spring:
   mongodb:
     uri: ${ZENDR_DB_URI}
-    database: "zender_db"
+    database: zendr_db
     auto-index-creation: true
